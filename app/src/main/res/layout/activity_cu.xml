@@ -7,11 +7,10 @@
     android:orientation="vertical"
     tools:context=".cu">
 
-    <TextView
-        android:id="@+id/textView"
+    <ListView
+        android:id="@+id/cu_listview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="hello im cu" />
+        android:layout_height="413dp" />
 
     <Button
         android:id="@+id/rtn_btn"
