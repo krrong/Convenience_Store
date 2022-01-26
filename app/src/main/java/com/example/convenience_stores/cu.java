@@ -29,12 +29,15 @@ public class cu extends AppCompatActivity {
                 finish();
             }
         });
+        
+        
+        ListView listView = findViewById(R.id.cu_listview);                     // listview
+        ArrayList<singleItem> items = new ArrayList<>();                        // item 저장할 ArrayList
+        items.add(new singleItem("롯데)빅팜60g","1600원",R.drawable.img0));          // item 추가
+        items.add(new singleItem("해피바스)로즈바디워시","5000원",R.drawable.img1));   // item 추가
+        items.add(new singleItem("46cm)초극세모칫솔","3500원",R.drawable.img2));     // item 추가
 
-        ListView listView = findViewById(R.id.cu_listview);
-        ArrayList<singleItem> items = new ArrayList<>();
-        items.add(new singleItem("빅팜","1600원",R.drawable.img0));
-
-        singleItemAdapter adapter = new singleItemAdapter(items, getApplicationContext());
-        listView.setAdapter(adapter);
+        singleItemAdapter adapter = new singleItemAdapter(items, getApplicationContext());  // 어댑터 생성
+        listView.setAdapter(adapter);   // 어댑터 연결
     }
 }
