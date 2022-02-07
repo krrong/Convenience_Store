@@ -1,6 +1,8 @@
 package com.example.convenience_stores;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,10 +10,15 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class singleItemAdapter extends BaseAdapter {
     private Context context;
+    Bitmap bitmap;
     private ArrayList<singleItem> array_singleItem = new ArrayList<>();
 
     // 생성자
@@ -53,8 +60,41 @@ public class singleItemAdapter extends BaseAdapter {
         price.setText(array_singleItem.get(position).getPrice());
 
         ImageView image = view.findViewById(R.id.imageView);
-        image.setImageResource(array_singleItem.get(position).getResId());
-        
+//        image.setImageResource(array_singleItem.get(position).getResId());
+
+        // 안드로이드에서 네트워크와 관련된 작업을 할 때 별도의 작업 Thread를 생성하여 작업해야 한다.
+        Thread uThread = new Thread(){
+            @Override
+            public void run() {
+                try{
+                    // 객체에 저장된 url을 가지고 온다.
+                    URL url = new URL(array_singleItem.get(position).getUrl());
+                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+
+                    conn.setDoInput(true);  // 서버통신에서 입력 가능한 상태로 만든다.
+                    conn.connect();         // 연결된 곳에 접속
+
+                    InputStream is = conn.getInputStream();     // inputStream 값 가져오기
+                    bitmap = BitmapFactory.decodeStream(is);    // bitmap으로 변환
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        // 작업 Thread 시작
+        uThread.start();
+
+        try{
+            // join() : 별도의 작업 Thread가 종료될 때까지 메인 Thread대기 시킴
+            // -> InterruptException 발생시킴
+
+            uThread.join();
+            image.setImageBitmap(bitmap);
+        }catch(InterruptedException e){
+            e.printStackTrace();
+        }
+
         // view 반환
         return view;
     }
