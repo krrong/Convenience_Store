@@ -1,9 +1,9 @@
 package com.example.convenience_stores;
 
 public class singleItem {
-    String name;
-    String price;
-    int resId;
+    String name;    // 상품이름
+    String price;   // 상품가격
+    int resId;      // 상품이미지 번호
 
     // 생성자
     public singleItem(String name, String price, int resId){
