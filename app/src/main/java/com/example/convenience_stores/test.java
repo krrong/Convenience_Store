@@ -39,7 +39,7 @@ public class test extends AppCompatActivity {
         items.add(new singleItem("t","1000",""));
         items.add(new singleItem("u","1000",""));
 
-        RecyclerView recyclerView = findViewById(R.id.recycle);
+        RecyclerView recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         ItemAdapter adapter = new ItemAdapter(items);
