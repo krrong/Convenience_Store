@@ -1,12 +1,13 @@
 package com.example.convenience_stores;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,18 +19,21 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
+public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private final int VIEW_TYPE_ITEM = 0;
+    private final int VIEW_TYPE_LOADING = 1;
+
     private ArrayList<singleItem> items = new ArrayList<>();    // 어댑터에 들어갈 list
     Bitmap bitmap;  // 이미지 비트맵
 
     // ViewHolder
     // 여기서 subView를 setting해줘야 함
-    public class ViewHolder extends  RecyclerView.ViewHolder{
+    public class ItemViewHolder extends RecyclerView.ViewHolder{
         ImageView imageView;
         TextView name;
         TextView price;
 
-        ViewHolder(View itemView){
+        ItemViewHolder(View itemView){
             super(itemView);
 
             imageView = itemView.findViewById(R.id.imageView);
@@ -77,23 +81,48 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         }
     }
 
+    public class LoadingViewHolder extends RecyclerView.ViewHolder{
+        public ProgressBar progressBar;
+
+        public LoadingViewHolder(@NonNull View itemView){
+            super(itemView);
+            progressBar = itemView.findViewById(R.id.progressBar);
+        }
+    }
+
+    // 생성자
     ItemAdapter(ArrayList<singleItem> list) {
         items = list;
     }
 
-    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // LayoutInflater를 이용하여 test.xml inflate
-        // ViewHolder 반환
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if(viewType == VIEW_TYPE_ITEM){
+            // LayoutInflater를 이용하여 test.xml inflate
+            // ViewHolder 반환
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false);
+            return new ItemViewHolder(view);
+        }
+        else{
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false);
+            return new LoadingViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(ItemAdapter.ViewHolder holder, int position) {
-        // item을 하나, 하나 보여주는 함수(bind)
-        holder.onBind(items.get(position));
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if(holder instanceof ItemViewHolder){
+            // item을 하나, 하나 보여주는 함수(bind)
+            ((ItemViewHolder) holder).onBind(items.get(position));
+        }
+        else if(holder instanceof LoadingViewHolder){
+           showLoadingView((LoadingViewHolder) holder, position);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return items.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
     @Override
@@ -102,6 +131,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         return items.size();
     }
 
+    private void showLoadingView(LoadingViewHolder holder, int position) {
+
+    }
 
 }
 
