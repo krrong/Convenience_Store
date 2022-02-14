@@ -98,5 +98,4 @@ public class singleItemAdapter extends BaseAdapter {
         // view 반환
         return view;
     }
-
 }

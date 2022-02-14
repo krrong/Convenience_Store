@@ -7,10 +7,10 @@
     android:orientation="vertical"
     tools:context=".cu">
 
-    <ListView
-        android:id="@+id/cu_listview"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="587dp" />
+        android:layout_height="match_parent" />
 
     <Button
         android:id="@+id/rtn_btn"
