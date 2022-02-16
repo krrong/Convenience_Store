@@ -131,6 +131,12 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return items.size();
     }
 
+    // 검색 기능 추가
+    public void filterList(ArrayList<singleItem> list){
+        items = list;
+        notifyDataSetChanged();
+    }
+
     private void showLoadingView(LoadingViewHolder holder, int position) {
 
     }

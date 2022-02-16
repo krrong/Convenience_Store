@@ -8,12 +8,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import org.jetbrains.annotations.NotNull;
@@ -28,9 +31,11 @@ import java.util.List;
 public class cu extends AppCompatActivity {
     // item 저장할 ArrayList
     ArrayList<singleItem> items = new ArrayList<>();
+    ArrayList<singleItem> searchList = new ArrayList<>();
     // adapter
     ItemAdapter adapter;
     Button rtn_btn;
+    EditText search;
     private RecyclerView recyclerView;
 
     private boolean isLoading = false;  // 로딩중 표시
@@ -50,6 +55,7 @@ public class cu extends AppCompatActivity {
         dataLoad();
         initAdapter();
         initScrollListener();
+        initEditText();
     }
 
     // 돌아가기 버튼+기능
@@ -118,6 +124,39 @@ public class cu extends AppCompatActivity {
         // adapter 연결
         recyclerView.setAdapter(adapter);
     }
+
+    private void initEditText(){
+        search = findViewById(R.id.editText);
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String searchText = search.getText().toString();
+                searchFilter(searchText);
+            }
+
+            public void searchFilter(String searchText){
+                searchList.clear();
+
+                for(int i=0; i<items.size(); i++){
+                    if(items.get(i).getName().toLowerCase().contains(searchText.toLowerCase())){
+                        searchList.add(items.get(i));
+                    }
+                }
+                adapter.filterList(searchList);
+            }
+        });
+    }
+
 
     // 스크롤 관련 메서드 정리
     private void initScrollListener(){

@@ -7,10 +7,18 @@
     android:orientation="vertical"
     tools:context=".cu">
 
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="찾는 물품 검색"
+        android:inputType="textPersonName" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="627dp" />
 
     <Button
         android:id="@+id/rtn_btn"
