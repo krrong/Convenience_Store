@@ -129,7 +129,7 @@ public class cu extends AppCompatActivity {
                 LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
 
                 if(!isLoading){
-                    // 배열의 마지막이면 추가로 로드
+                    // 배열의 마지막이면 loadMore을 이용하여 추가로드
                     if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == items.size() -1){
                         loadMore();
                         isLoading = true;
@@ -169,6 +169,7 @@ public class cu extends AppCompatActivity {
                 int currentSize = scrollPosition;
                 int nextLimit = currentSize + load_length;
 
+                // nextLimit이 전체 상품 개수보다 크면 수동으로 크기 설정
                 if(nextLimit > CU_name.length - 1){
                     nextLimit = CU_name.length - 1;
                 }
@@ -182,6 +183,6 @@ public class cu extends AppCompatActivity {
                 isLoading = false;
             }
 
-        }, 1000);
+        }, 2000);
     }
 }
