@@ -33,7 +33,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView name;
         TextView price;
 
-        ItemViewHolder(View itemView){
+        ItemViewHolder(@NonNull View itemView){
             super(itemView);
 
             imageView = itemView.findViewById(R.id.imageView);
@@ -70,7 +70,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             uThread.start();
 
             try{
-                // join() : 별도의 작업 Thread가 종료될 때까지 메인 Thread대기 시킴
+                // join() : 별도의 작업 Thread가 종료될 때까지 메인 Thread 대기시킴
                 // -> InterruptException 발생시킴
 
                 uThread.join();
