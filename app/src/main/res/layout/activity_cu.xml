@@ -18,7 +18,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="627dp" />
+        android:layout_height="454dp" />
 
     <Button
         android:id="@+id/rtn_btn"

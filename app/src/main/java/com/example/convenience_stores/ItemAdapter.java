@@ -23,7 +23,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
 
-    private ArrayList<singleItem> items = new ArrayList<>();    // 어댑터에 들어갈 list
+    private ArrayList<singleItem> items;    // 어댑터에 들어갈 list
     Bitmap bitmap;  // 이미지 비트맵
 
     // ViewHolder
@@ -81,6 +81,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    // 로딩바
     public class LoadingViewHolder extends RecyclerView.ViewHolder{
         public ProgressBar progressBar;
 
@@ -121,17 +122,28 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
+    // 게시물과 프로그레스바 아이템 뷰 구분
     public int getItemViewType(int position) {
         return items.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
     @Override
+    // RecyclerView 아이템의 총 개수
     public int getItemCount() {
-        // RecyclerView의 총 개수
         return items.size();
     }
 
-    // 검색 기능 추가
+    // 어댑터의 아이템 리스트에 추가 
+    public void addItem(singleItem item) {
+        items.add(item);
+    }
+
+    // 어댑터의 아이템 리스트 반환 
+    public ArrayList<singleItem> getItems() {
+        return items;
+    }
+
+    // 검색 기능을 위해 어댑터의 리스트 변경
     public void filterList(ArrayList<singleItem> list){
         items = list;
         notifyDataSetChanged();

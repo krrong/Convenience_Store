@@ -29,17 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class cu extends AppCompatActivity {
-    // item 저장할 ArrayList
-    ArrayList<singleItem> items = new ArrayList<>();
-    ArrayList<singleItem> searchList = new ArrayList<>();
-    // adapter
-    ItemAdapter adapter;
-    Button rtn_btn;
-    EditText search;
-    private RecyclerView recyclerView;
+    private ArrayList<singleItem> searchList = new ArrayList<>();       // 검색한 단어와 일치하는 리스트 저장 용도
+    private ArrayList<singleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
+    RecyclerView recyclerView;
+    ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
+    Button rtn_btn;     // 돌아가기 버튼
+    EditText search;    // 검색창
 
     private boolean isLoading = false;  // 로딩중 표시
-    private int load_length = 20;       // 받아올 데이터 개수
+    private int loadLength = 20;        // 받아올 데이터 개수
 
     String[] CU_name;   // 이름 배열
     String[] CU_price;  // 가격 배열
@@ -51,7 +49,7 @@ public class cu extends AppCompatActivity {
         setContentView(R.layout.activity_cu);
 
         initReturnBtn();
-        parsingData();
+        dataParsing();
         dataLoad();
         initAdapter();
         initScrollListener();
@@ -70,25 +68,25 @@ public class cu extends AppCompatActivity {
     }
 
     // 상품, 가격, 링크를 [res] -> [raw] -> [.txt]파일로부터 읽어와 배열에 저장
-    private void parsingData(){
+    private void dataParsing(){
         try {
-            InputStream in_name = getResources().openRawResource(R.raw.cu_11_name);
-            InputStream in_price = getResources().openRawResource(R.raw.cu_11_price);
-            InputStream in_url  = getResources().openRawResource(R.raw.cu_11_link);
+            InputStream inName = getResources().openRawResource(R.raw.cu_11_name);
+            InputStream inPrice = getResources().openRawResource(R.raw.cu_11_price);
+            InputStream inUrl  = getResources().openRawResource(R.raw.cu_11_link);
 
-            byte[] b_name = new byte[in_name.available()]; // available = 읽을 수 있는 바이트 수 반환
-            byte[] b_price = new byte[in_price.available()];
-            byte[] b_url  = new byte[in_url.available()];
+            byte[] bName = new byte[inName.available()]; // available = 읽을 수 있는 바이트 수 반환
+            byte[] bPrice = new byte[inPrice.available()];
+            byte[] bUrl  = new byte[inUrl.available()];
 
             // 인자만큼 읽어오기
-            in_name.read(b_name);
-            in_price.read(b_price);
-            in_url.read(b_url);
+            inName.read(bName);
+            inPrice.read(bPrice);
+            inUrl.read(bUrl);
 
             // byte -> string 변환
-            String s_name = new String(b_name);
-            String s_price = new String(b_price);
-            String s_url = new String(b_url);
+            String s_name = new String(bName);
+            String s_price = new String(bPrice);
+            String s_url = new String(bUrl);
 
 ////            잘 읽어오는지 확인을 위한 로그
 //            Log.e("test",s_name);
@@ -104,12 +102,14 @@ public class cu extends AppCompatActivity {
         }
     }
 
-    // 처음 실행하는 데이터 로드 함수(load_length)개의 데이터 로드
+    // 처음 실행하는 데이터 로드 함수(loadLength)개의 데이터 로드
     private void dataLoad(){
         // ArrayList에 아이템 추가(이름, 가격, url) 290개 추가
-        for(int i=0; i<load_length; i++){
-            items.add(new singleItem(CU_name[i], CU_price[i], CU_url[i]));
+        for(int i=0; i<loadLength; i++){
+            adapter.addItem(new singleItem(CU_name[i], CU_price[i], CU_url[i]));
         }
+        // 현재 리스트 임시 저장(필터링 시 재사용 위함)
+        originalList = adapter.getItems();
     }
 
     // recyclerView 찾아서 adapter와 연결
@@ -118,13 +118,11 @@ public class cu extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // adapter 생성
-        adapter = new ItemAdapter(items);
-
         // adapter 연결
         recyclerView.setAdapter(adapter);
     }
 
+    // 검색창관련 메서드 정리
     private void initEditText(){
         search = findViewById(R.id.editText);
         search.addTextChangedListener(new TextWatcher() {
@@ -145,68 +143,79 @@ public class cu extends AppCompatActivity {
             }
 
             public void searchFilter(String searchText){
-                searchList.clear();
-
-                for(int i=0; i<items.size(); i++){
-                    if(items.get(i).getName().toLowerCase().contains(searchText.toLowerCase())){
-                        searchList.add(items.get(i));
-                    }
+                // == 대신 equals사용 해야함
+                // "" 이면 검색어를 지운 것이므로 기존 아이템들이 보이도록 동작(originalList 사용)
+                if(searchText.equals("")){
+                    adapter.filterList(originalList);
                 }
-                adapter.filterList(searchList);
+                // searchText 를 포함하는 아이템들만 보이도록 동작(searchList 사용)
+                else{
+                    searchList.clear();
+                    for(int i = 0; i < originalList.size(); i++){
+                        if(originalList.get(i).getName().toLowerCase().contains(searchText.toLowerCase())){
+                            searchList.add(originalList.get(i));
+                        }
+                    }
+                    adapter.filterList(searchList);
+                }
             }
         });
     }
-
 
     // 스크롤 관련 메서드 정리
     private void initScrollListener(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
+            // 사용자가 스크롤을 움직이는 동안 반복하여 호출됨
             public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
-                LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
-
-                if(!isLoading){
-                    // 배열의 마지막이면 loadMore을 이용하여 추가로드
-                    if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == items.size() -1){
-                        loadMore();
-                        isLoading = true;
-                    }
-                }
             }
 
             @Override
             public void onScrollStateChanged(@NonNull @NotNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                // 스크롤이 최상단인지 확인
+                // 스크롤이 최상단일 경우
                 if(!recyclerView.canScrollVertically(-1)){
                     Log.e("cu 액티비티", "최상단");
                 }
-                // 스크롤이 최하단인지 확인
+                // 스크롤이 최하단일 경우
                 else if(!recyclerView.canScrollVertically(1)){
                     Log.e("cu 액티비티", "최하단");
+                    System.out.println(adapter.getItemCount());
+
+                    LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+                    System.out.println(layoutManager.findLastVisibleItemPosition());
+
+//                    LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+
+                    if(!isLoading){
+                        // 배열의 마지막이면 loadMore 함수를 이용하여 추가로드
+                        if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == adapter.getItemCount() -1){
+                            loadMore();
+                            isLoading = true;   // 2초후에 실행되는 loadMore에서 false로 바꿔줌
+                        }
+                    }
                 }
             }
         });
     }
 
-    // 추가로 로드하는 함수
+//     추가로 로드하는 함수
     private void loadMore(){
-        // progressBar 보기 위한 null 데이터 추가
-        items.add(null);
-        adapter.notifyItemInserted(items.size() - 1);
+//        // progressBar 보기 위한 null 데이터 추가
+        adapter.addItem(null);
+        adapter.notifyItemInserted(adapter.getItemCount());
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 // null 데이터 삭제
-                items.remove(items.size() - 1);
-                int scrollPosition = items.size();
+                adapter.getItems().remove(adapter.getItemCount() - 1);
+                int scrollPosition = adapter.getItemCount();
                 adapter.notifyItemRemoved(scrollPosition);
                 int currentSize = scrollPosition;
-                int nextLimit = currentSize + load_length;
+                int nextLimit = currentSize + loadLength;
 
                 // nextLimit이 전체 상품 개수보다 크면 수동으로 크기 설정
                 if(nextLimit > CU_name.length - 1){
@@ -215,13 +224,16 @@ public class cu extends AppCompatActivity {
 
                 // 아이템 추가
                 while(currentSize - 1 < nextLimit){
-                    items.add(new singleItem(CU_name[currentSize], CU_price[currentSize], CU_url[currentSize]));
+                    adapter.addItem(new singleItem(CU_name[currentSize], CU_price[currentSize], CU_url[currentSize]));
                     currentSize++;
                 }
                 adapter.notifyDataSetChanged();
                 isLoading = false;
+
+                // 현재 리스트 임시 저장(필터링 시 재사용 위함)
+                originalList = adapter.getItems();
             }
 
-        }, 2000);
+        }, 1000);
     }
 }
