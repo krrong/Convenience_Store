@@ -3,7 +3,7 @@ package com.example.convenience_stores;
 public class singleItem {
     String name;    // 상품이름
     String price;   // 상품가격
-    String url;      // 상품이미지 번호
+    String url;     // 상품이미지 저장링크
 
     // 생성자
     public singleItem(String name, String price, String url){

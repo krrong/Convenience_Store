@@ -20,16 +20,16 @@ import com.bumptech.glide.Glide;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
-
-//    private Context context;
     private ArrayList<singleItem> items;    // 어댑터에 들어갈 list
     Bitmap bitmap;  // 이미지 비트맵
 
@@ -60,11 +60,11 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-
+//            String imageUrl = item.getUrl();
+//            Log.e("링크", imageUrl);
             Glide
                     .with(imageView.getContext())
-                    .load(imageUrl)
-                    .placeholder(R.drawable.ic_launcher_background)
+                    .load(imageUrl.toString())
                     .into(imageView);
 
 //            // 안드로이드에서 네트워크와 관련된 작업을 할 때 별도의 작업 Thread를 생성하여 작업해야 한다.
