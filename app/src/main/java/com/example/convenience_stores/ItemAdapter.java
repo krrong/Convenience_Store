@@ -62,8 +62,8 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Glide
                     .with(imageView.getContext())
                     .load(imageUrl.toString())
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_foreground)
+                    .placeholder(R.drawable.img_loading)
+                    .error(R.drawable.img_error)
                     .into(imageView);
         }
     }
