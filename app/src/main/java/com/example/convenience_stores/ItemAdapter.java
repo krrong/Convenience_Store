@@ -53,52 +53,18 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             name.setText(item.getName());
             price.setText(item.getPrice());
 
-
             URL imageUrl = null;
             try {
                 imageUrl = new URL(item.getUrl());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
-//            String imageUrl = item.getUrl();
-//            Log.e("링크", imageUrl);
             Glide
                     .with(imageView.getContext())
                     .load(imageUrl.toString())
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_foreground)
                     .into(imageView);
-
-//            // 안드로이드에서 네트워크와 관련된 작업을 할 때 별도의 작업 Thread를 생성하여 작업해야 한다.
-//            Thread uThread = new Thread(){
-//                @Override
-//                public void run() {
-//                    try{
-//                        // 객체에 저장된 url을 가지고 온다.
-//                        URL url = new URL(item.getUrl());
-//                        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-//
-//                        conn.setDoInput(true);  // 서버통신에서 입력 가능한 상태로 만든다.
-//                        conn.connect();         // 연결된 곳에 접속
-//
-//                        InputStream is = conn.getInputStream();     // inputStream 값 가져오기
-//                        bitmap = BitmapFactory.decodeStream(is);    // bitmap으로 변환
-//                    }catch(IOException e){
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-//            };
-//            // 작업 Thread 시작
-//            uThread.start();
-//
-//            try{
-//                // join() : 별도의 작업 Thread가 종료될 때까지 메인 Thread 대기시킴
-//                // -> InterruptException 발생시킴
-//
-//                uThread.join();
-//                imageView.setImageBitmap(bitmap);
-//            }catch(InterruptedException e){
-//                e.printStackTrace();
-//            }
         }
     }
 
