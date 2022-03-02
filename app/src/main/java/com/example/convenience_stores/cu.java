@@ -19,6 +19,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,11 +35,15 @@ public class cu extends AppCompatActivity {
     private ArrayList<singleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
     RecyclerView recyclerView;
     ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
-    Button rtn_btn;     // 돌아가기 버튼
-    EditText search;    // 검색창
+    Button rtn_btn;         // 돌아가기 버튼
+    EditText search;        // 검색창
+    TextView countTextView; // n/m 표기위한 텍스트뷰
+    String msg;             // n/m 표기위한 메시지
 
     private boolean isLoading = false;  // 로딩중 표시
     private int loadLength = 20;        // 받아올 데이터 개수
+    private int totalLength = 0;        // 선택한 페이지의 데이터 총 개수
+    private int curLength = 0;          // 선택한 페이지의 데이터 현재 개수
 
     String[] CU_name;   // 이름 배열
     String[] CU_price;  // 가격 배열
@@ -72,6 +77,7 @@ public class cu extends AppCompatActivity {
             gsDataParsing(event);
         }
 
+        initTextView();
         initReturnBtn();
         dataLoad(place);
         initAdapter();
@@ -88,6 +94,13 @@ public class cu extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    // n/m 텍스트 표시
+    private void initTextView(){
+        countTextView = findViewById(R.id.countTextView);
+        msg = Integer.toString(loadLength) + "/" + Integer.toString(totalLength);
+        countTextView.setText(msg);
     }
 
     // 상품, 가격, 링크를 [res] -> [raw] -> [.txt]파일로부터 읽어와 배열에 저장
@@ -121,6 +134,10 @@ public class cu extends AppCompatActivity {
                 CU_name = s_name.split("\n");
                 CU_price = s_price.split("\n");
                 CU_url = s_url.split("\n");
+
+                // 데이터 총 개수
+                totalLength = CU_name.length;
+                Log.e("테스트", Integer.toString(totalLength));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -149,6 +166,7 @@ public class cu extends AppCompatActivity {
                 CU_name = s_name.split("\n");
                 CU_price = s_price.split("\n");
                 CU_url = s_url.split("\n");
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -246,32 +264,32 @@ public class cu extends AppCompatActivity {
             }
         }
         else{
-//            try {
-//                InputStream inName = getResources().openRawResource(R.raw.gs_21_name);
-//                InputStream inPrice = getResources().openRawResource(R.raw.gs_21_price);
-//                InputStream inUrl  = getResources().openRawResource(R.raw.gs_21_link);
-//
-//                byte[] bName = new byte[inName.available()]; // available = 읽을 수 있는 바이트 수 반환
-//                byte[] bPrice = new byte[inPrice.available()];
-//                byte[] bUrl  = new byte[inUrl.available()];
-//
-//                // 인자만큼 읽어오기
-//                inName.read(bName);
-//                inPrice.read(bPrice);
-//                inUrl.read(bUrl);
-//
-//                // byte -> string 변환
-//                String s_name = new String(bName);
-//                String s_price = new String(bPrice);
-//                String s_url = new String(bUrl);
-//
-//                // "\n" 단위로 나누어 상품명, 가격, 이미지 url 배열에 저장
-//                GS_name = s_name.split("\n");
-//                GS_price = s_price.split("\n");
-//                GS_url = s_url.split("\n");
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                InputStream inName = getResources().openRawResource(R.raw.gs_21_name);
+                InputStream inPrice = getResources().openRawResource(R.raw.gs_21_price);
+                InputStream inUrl  = getResources().openRawResource(R.raw.gs_21_link);
+
+                byte[] bName = new byte[inName.available()]; // available = 읽을 수 있는 바이트 수 반환
+                byte[] bPrice = new byte[inPrice.available()];
+                byte[] bUrl  = new byte[inUrl.available()];
+
+                // 인자만큼 읽어오기
+                inName.read(bName);
+                inPrice.read(bPrice);
+                inUrl.read(bUrl);
+
+                // byte -> string 변환
+                String s_name = new String(bName);
+                String s_price = new String(bPrice);
+                String s_url = new String(bUrl);
+
+                // "\n" 단위로 나누어 상품명, 가격, 이미지 url 배열에 저장
+                GS_name = s_name.split("\n");
+                GS_price = s_price.split("\n");
+                GS_url = s_url.split("\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -374,8 +392,6 @@ public class cu extends AppCompatActivity {
                     LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
                     System.out.println(layoutManager.findLastVisibleItemPosition());
 
-//                    LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
-
                     if(!isLoading){
                         // 배열의 마지막이면 loadMore 함수를 이용하여 추가로드
                         if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == adapter.getItemCount() -1){
@@ -441,7 +457,9 @@ public class cu extends AppCompatActivity {
                         currentSize++;
                     }
                 }
-
+                msg = Integer.toString(currentSize) + "/" + Integer.toString(totalLength);
+                countTextView.setText(msg);
+                
                 adapter.notifyDataSetChanged();
                 isLoading = false;
 
