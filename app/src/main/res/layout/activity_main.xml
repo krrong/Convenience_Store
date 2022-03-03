@@ -13,19 +13,30 @@
         android:id="@+id/cu_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/cuBackground"
+        android:textColor="@color/cuText"
+        android:textStyle="bold"
+        android:layout_margin="10sp"
         android:text="CU" />
 
     <Button
         android:id="@+id/seven_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="7-ELEVEN" />
+        android:background="@color/sevenBackground"
+        android:textColor="@color/sevenText"
+        android:textStyle="bold"
+        android:layout_margin="10sp"
+        android:text="7-ELEVN" />
 
     <Button
         android:id="@+id/gs_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/gsBackground"
+        android:textColor="@color/gsText"
+        android:textStyle="bold"
+        android:layout_margin="10sp"
         android:text="GS25" />
-
 
 </LinearLayout>
