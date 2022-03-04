@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SelectEvent.class);
-                intent.putExtra("place","cu");
+                intent.putExtra("place","CU");
                 startActivity(intent);
             }
         });
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SelectEvent.class);
-                intent.putExtra("place","seven");
+                intent.putExtra("place","7ELEVEn");
                 startActivity(intent);
             }
         });
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SelectEvent.class);
-                intent.putExtra("place","gs");
+                intent.putExtra("place","GS25");
                 startActivity(intent);
             }
         });

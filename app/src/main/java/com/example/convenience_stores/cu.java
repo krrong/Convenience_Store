@@ -33,19 +33,20 @@ import java.util.List;
 public class cu extends AppCompatActivity {
     private ArrayList<singleItem> searchList = new ArrayList<>();       // 검색한 단어와 일치하는 리스트 저장 용도
     private ArrayList<singleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
-    RecyclerView recyclerView;
-    ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
-    Button rtn_btn;         // 돌아가기 버튼
-    EditText search;        // 검색창
-    TextView countTextView; // n/m 표기위한 텍스트뷰
-    String msg;             // n/m 표기위한 메시지
+    private RecyclerView recyclerView;
+    private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
+    private Button rtn_btn;         // 돌아가기 버튼
+    private EditText search;        // 검색창
+    private TextView countTextView; // n/m 표기위한 텍스트뷰
+    private TextView pageInfo;      // 편의점, 행사 표기 텍스트뷰
+    private String msg;             // n/m 표기위한 메시지
 
     private boolean isLoading = false;  // 로딩중 표시
     private int loadLength = 20;        // 받아올 데이터 개수
 
-    String[] nameList;  // 이름 배열
-    String[] priceList; // 가격 배열
-    String[] urlList;   // 링크 배열
+    private String[] nameList;  // 이름 배열
+    private String[] priceList; // 가격 배열
+    private String[] urlList;   // 링크 배열
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,29 +58,42 @@ public class cu extends AppCompatActivity {
         String event = intent.getStringExtra("event");
 
         dataParsing(place, event);  // 편의점, 행사에 맞춰 알맞는 파일 읽어서 데이터 파싱
-        initTextView();             // n/m개 텍스트 뷰 보이도록 초기설정
-        initReturnBtn();            // 돌아가기 버튼 초기설정
+        initSetting(intent);        // 초기 설정
+        changeCountText(loadLength);// n/m개 텍스트 뷰 보이도록 초기설정
         dataLoad();                 // 배열에 저장한 데이터 loadLength(20개) 만큼 추가하기
         initAdapter();              // 어댑터 연결하기
         initScrollListener(place);
         initEditText();             // 검색창 검색했을 때
     }
 
-    // 돌아가기 버튼 + 기능
-    private void initReturnBtn(){
+    // 초기 설정
+    private void initSetting(Intent intent){
         rtn_btn = findViewById(R.id.rtn_btn);
+        countTextView = findViewById(R.id.countTextView);
+        pageInfo = findViewById(R.id.pageInfo);
+        recyclerView = findViewById(R.id.recycler);
+
         rtn_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
+
+        String place = intent.getStringExtra("place");
+        String event = intent.getStringExtra("event");
+
+        if (event.equals("11")){
+            pageInfo.setText(place + " 1 + 1 행사");
+        }
+        else {
+            pageInfo.setText(place + " 2 + 1 행사");
+        }
     }
 
     // n/m 텍스트 표시
-    private void initTextView(){
-        countTextView = findViewById(R.id.countTextView);
-        msg = Integer.toString(loadLength) + "/" + Integer.toString(nameList.length);
+    private void changeCountText(int size){
+        msg = Integer.toString(size) + "/" + Integer.toString(nameList.length);
         countTextView.setText(msg);
     }
 
@@ -92,12 +106,12 @@ public class cu extends AppCompatActivity {
         // 편의점과 행사에 맞는 파일 가져오기
         // 1+1
         if(event.equals("11")) {
-            if (place.equals("cu")){
+            if (place.equals("CU")){
                 inName = getResources().openRawResource(R.raw.cu_11_name);
                 inPrice = getResources().openRawResource(R.raw.cu_11_price);
                 inUrl  = getResources().openRawResource(R.raw.cu_11_link);
             }
-            else if(place.equals("seven")){
+            else if(place.equals("7ELEVEn")){
                 inName = getResources().openRawResource(R.raw.seven_11_name);
                 inPrice = getResources().openRawResource(R.raw.seven_11_price);
                 inUrl  = getResources().openRawResource(R.raw.seven_11_link);
@@ -110,12 +124,12 @@ public class cu extends AppCompatActivity {
         }
         // 2+1
         else{
-            if (place.equals("cu")){
+            if (place.equals("CU")){
                 inName = getResources().openRawResource(R.raw.cu_21_name);
                 inPrice = getResources().openRawResource(R.raw.cu_21_price);
                 inUrl  = getResources().openRawResource(R.raw.cu_21_link);
             }
-            else if(place.equals("seven")){
+            else if(place.equals("7ELEVEn")){
                 inName = getResources().openRawResource(R.raw.seven_21_name);
                 inPrice = getResources().openRawResource(R.raw.seven_21_price);
                 inUrl  = getResources().openRawResource(R.raw.seven_21_link);
@@ -162,10 +176,9 @@ public class cu extends AppCompatActivity {
         originalList = adapter.getItems();
     }
 
-    // recyclerView 찾아서 adapter와 연결
+    // recyclerView - adapter 연결
     private void initAdapter(){
         // activity_cu.xml에 있는 recyclerview 가져와서 adapter 붙여 넣기
-        recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // adapter 연결
@@ -276,8 +289,10 @@ public class cu extends AppCompatActivity {
                     currentSize++;
                 }
 
-                msg = Integer.toString(currentSize) + "/" + Integer.toString(nameList.length);
-                countTextView.setText(msg);
+//                msg = Integer.toString(currentSize) + "/" + Integer.toString(nameList.length);
+//                countTextView.setText(msg);
+                // n/m개 텍스트 뷰 변경
+                changeCountText(currentSize);
                 
                 adapter.notifyDataSetChanged();
                 isLoading = false;
