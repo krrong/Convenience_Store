@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -36,6 +37,7 @@ public class cu extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
     private Button rtn_btn;         // 돌아가기 버튼
+    private Button lowerBtn;
     private EditText search;        // 검색창
     private TextView countTextView; // n/m 표기위한 텍스트뷰
     private TextView pageInfo;      // 편의점, 행사 표기 텍스트뷰
@@ -72,6 +74,7 @@ public class cu extends AppCompatActivity {
         countTextView = findViewById(R.id.countTextView);
         pageInfo = findViewById(R.id.pageInfo);
         recyclerView = findViewById(R.id.recycler);
+        lowerBtn = findViewById(R.id.lowerBtn);
 
         rtn_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +85,18 @@ public class cu extends AppCompatActivity {
 
         String place = intent.getStringExtra("place");
         String event = intent.getStringExtra("event");
+
+        lowerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    recyclerView.scrollToPosition(recyclerView.getAdapter().getItemCount()-1);
+                Log.e("nameList 개수 : ", Integer.toString(nameList.length));
+                Log.e("Adapter 데이터 개수 : ", Integer.toString(recyclerView.getAdapter().getItemCount()-1));
+                    if(nameList.length == recyclerView.getAdapter().getItemCount()){
+                        Toast.makeText(view.getContext(), "모두 내렸습니다.", Toast.LENGTH_SHORT).show();
+                    }
+            }
+        });
 
         if (event.equals("11")){
             pageInfo.setText(place + " 1 + 1 행사");
@@ -289,8 +304,6 @@ public class cu extends AppCompatActivity {
                     currentSize++;
                 }
 
-//                msg = Integer.toString(currentSize) + "/" + Integer.toString(nameList.length);
-//                countTextView.setText(msg);
                 // n/m개 텍스트 뷰 변경
                 changeCountText(currentSize);
                 

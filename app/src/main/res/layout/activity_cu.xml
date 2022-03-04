@@ -54,4 +54,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="돌아가기" />
+
+    <Button
+        android:id="@+id/lowerBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="아래로" />
 </LinearLayout>
