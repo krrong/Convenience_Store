@@ -31,7 +31,6 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
     private ArrayList<singleItem> items;    // 어댑터에 들어갈 list
-    Bitmap bitmap;  // 이미지 비트맵
 
     // ViewHolder
     // 여기서 subView를 setting해줘야 함
@@ -48,7 +47,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             price = itemView.findViewById(R.id.text_price);
         }
 
-        // bind해주는 함수
+        // bind 해주는 함수
         void onBind(singleItem item){
             name.setText(item.getName());
             price.setText(item.getPrice());
@@ -63,7 +62,6 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .with(imageView.getContext())
                     .load(imageUrl.toString())
                     .placeholder(R.drawable.img_loading)
-                    .error(R.drawable.img_error)
                     .into(imageView);
         }
     }
