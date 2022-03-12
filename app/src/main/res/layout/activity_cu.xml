@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context=".cu">
 
 
@@ -18,7 +20,7 @@
             android:id="@+id/pageInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="안녕"
+            android:text=""
             android:layout_gravity="left" />
 
         <View
@@ -32,14 +34,15 @@
             android:id="@+id/countTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="빠잉"
+            android:text=""
             android:layout_gravity="right" />
     </LinearLayout>
 
     <EditText
         android:id="@+id/editText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:ems="10"
         android:hint="찾는 물품 검색"
         android:inputType="textPersonName" />
@@ -47,17 +50,27 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="454dp" />
+        android:layout_weight="10"
+        android:layout_height="0dp" />
 
     <Button
         android:id="@+id/rtn_btn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:text="돌아가기" />
 
     <Button
         android:id="@+id/lowerBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:text="아래로" />
+
+    <Button
+        android:id="@+id/search_map"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="근처 편의점 찾기" />
 </LinearLayout>
