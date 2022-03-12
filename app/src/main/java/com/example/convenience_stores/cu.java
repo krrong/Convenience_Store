@@ -37,7 +37,8 @@ public class cu extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
     private Button rtn_btn;         // 돌아가기 버튼
-    private Button lowerBtn;
+    private Button lowerBtn;        // 아래로 이동 버튼
+    private Button searchBtn;       // 주변 편의점 찾는 버튼
     private EditText search;        // 검색창
     private TextView countTextView; // n/m 표기위한 텍스트뷰
     private TextView pageInfo;      // 편의점, 행사 표기 텍스트뷰
@@ -75,6 +76,7 @@ public class cu extends AppCompatActivity {
         pageInfo = findViewById(R.id.pageInfo);
         recyclerView = findViewById(R.id.recycler);
         lowerBtn = findViewById(R.id.lowerBtn);
+        searchBtn = findViewById(R.id.searchMapBtn);
 
         rtn_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +87,17 @@ public class cu extends AppCompatActivity {
 
         String place = intent.getStringExtra("place");
         String event = intent.getStringExtra("event");
+
+        // 선택한 편의점에 맞도록 text구성
+        searchBtn.setText("주변 " + place + "찾기");
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), SearchMap.class);
+                intent.putExtra("place",place);
+                startActivity(intent);
+            }
+        });
 
         lowerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
