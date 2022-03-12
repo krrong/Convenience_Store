@@ -57,6 +57,8 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
     List<Marker> previous_marker = null;
     private GoogleMap mMap;
     private Marker currentMarker = null;
+    private boolean isMoved = false;        // 초기 한 번만 이동하기 위한 flag
+    private Button searchBtn;
 
     private static final String TAG = "Convenience Store";
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -76,8 +78,10 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest locationRequest;
     private Location location;
+    
+    private String name;    // 편의점 이름
 
-    // Snackbar를 사용하기 위해서는 view가 필요함
+    // Snackbar를 사용하기 위해서는 view 필요
     private View mLayout;
 
     @Override
@@ -112,27 +116,36 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Button button = findViewById(R.id.button);
+
+        // 장소 검색 버튼 초기화, 메서드
+        Intent intent = getIntent();
+        name = intent.getStringExtra("place");
+        searchBtn = findViewById(R.id.searchBtn);
         previous_marker = new ArrayList<Marker>();
-        button.setOnClickListener(new View.OnClickListener() {
+        searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showPlaceInformation(currentPosition);
             }
         });
+        // View.class의 setOnClickListener에서 내부적으로 setClickable(true)를 만들어줘서
+        // setOnClickListener 호출 이후에 setClickable(false)을 해줘야 클릭 불가능하도록 만들 수 있음
+        searchBtn.setText("위치를 찾을 때까지 기다려주세요!");
+        searchBtn.setClickable(false);
     }
 
     @Override
+    // map이 사용가능하면 호출되는 콜백 메서드
     public void onMapReady(final GoogleMap googleMap) {
         Log.d(TAG, "onMapReady :");
 
         mMap = googleMap;
 
-        //런타임 퍼미션 요청 대화상자나 GPS 활성 요청 대화상자 보이기전에
-        //지도의 초기위치를 서울로 이동
+        // 런타임 퍼미션 요청 대화상자나 GPS 활성 요청 대화상자 보이기전에
+        // 지도의 초기위치를 서울로 이동
         setDefaultLocation();
 
-        //런타임 퍼미션 처리
+        // 런타임 퍼미션 처리
         // 1. ContextCompat.checkSelfPermission 을 통해 위치 퍼미션을 가지고 있는지 체크
         // -> 특정 권한이 PackageManager.PERMISSION_DENIED 인지, PackageManager.PERMISSION_GRANTED 인지 반환
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(this,
@@ -152,7 +165,7 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
             startLocationUpdates(); // 3. 위치 업데이트 시작
 
         }
-        else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요. 2가지 경우(3-1, 4-1)가 있다.
+        else {  // 2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요. 2가지 경우(3-1, 4-1)가 있다.
 
             // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우
             // ActivityCompat.shouldShowRequestPermissionRationale
@@ -185,7 +198,6 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-
             @Override
             public void onMapClick(LatLng latLng) {
 
@@ -213,10 +225,12 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
 
                 Log.d(TAG, "onLocationResult : " + markerSnippet);
 
-                //현재 위치에 마커 생성하고 이동
-                setCurrentLocation(location, markerTitle, markerSnippet);
+                // 현재 위치에 마커 생성하고 이동
+                setCurrentLocation(location, "현재 위치", markerTitle);
 
                 mCurrentLocation = location;
+                searchBtn.setClickable(true);
+                searchBtn.setText("근처 " + name + "찾기");
             }
         }
 
@@ -333,10 +347,12 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
 
         currentMarker = mMap.addMarker(markerOptions);
 
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
-        mMap.moveCamera(cameraUpdate);
+        if(isMoved == false){
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
+            mMap.moveCamera(cameraUpdate);
+            isMoved = true;
+        }
     }
-
 
     public void setDefaultLocation() {
         //디폴트 위치, Seoul
@@ -481,6 +497,7 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
     }
 
     @Override
+    // 주변 편의점의 위치를 마커로 그리는 부분
     public void onPlacesSuccess(final List<Place> places) {
         Log.d(TAG,"onPlacesSuccess");
         runOnUiThread(new Runnable() {
@@ -502,14 +519,15 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
                     Log.e(TAG, place.getName());
                     Log.e(TAG, markerSnippet);
 
-                    if(markerOptions.getTitle().equals("CU")){
+                    // 선택한 편의점에 맞는 편의점들만 추가
+                    if(markerOptions.getTitle().contains(name)){
                         Marker item = mMap.addMarker(markerOptions);
                         previous_marker.add(item);
                     }
 
                 }
 
-                //중복 마커 제거
+                // 중복 마커 제거
                 HashSet<Marker> hashSet = new HashSet<Marker>();
                 hashSet.addAll(previous_marker);
                 previous_marker.clear();
@@ -523,19 +541,19 @@ public class SearchMap extends AppCompatActivity implements OnMapReadyCallback, 
 
     }
 
-    public void showPlaceInformation(LatLng location)
-    {
-        mMap.clear();//지도 클리어
+    public void showPlaceInformation(LatLng location){
+        mMap.clear(); // 지도에 있는 마커 삭제
 
         if (previous_marker != null)
-            previous_marker.clear();//지역정보 마커 클리어
+            previous_marker.clear();    // 지역정보 마커 클리어
 
+        // NRPlaces.Builder() -> Place API로부터 받아오는 JSON 데이터를 분석하여 인근 지역 정보를 얻게 됨
         new NRPlaces.Builder()
                 .listener(SearchMap.this)
                 .key("AIzaSyBHwpuDOaPC9W_Kp6iTlYTsFgmM01IBFy8")
-                .latlng(location.latitude, location.longitude)//현재 위치
-                .radius(500) //1000 미터 내에서 검색
-                .type(PlaceType.CONVENIENCE_STORE) //음식점
+                .latlng(location.latitude, location.longitude)  // 현재 위치
+                .radius(500) // 500 미터 내에서 검색
+                .type(PlaceType.CONVENIENCE_STORE) // 편의점
                 .build()
                 .execute();
     }
