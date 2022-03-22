@@ -8,7 +8,6 @@
     android:gravity="center"
     tools:context=".MainActivity">
 
-
     <Button
         android:id="@+id/cu_btn"
         android:layout_width="match_parent"
@@ -38,5 +37,16 @@
         android:textStyle="bold"
         android:layout_margin="10sp"
         android:text="GS25" />
+
+    <Button
+        android:id="@+id/btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gsBackground"
+        android:textColor="@color/gsText"
+        android:textStyle="bold"
+        android:layout_margin="10sp"
+        android:text="check" />
+
 
 </LinearLayout>
