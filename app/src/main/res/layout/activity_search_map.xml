@@ -5,20 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/layout_main"
     tools:context=".SearchMap">
 
-    <fragment
-        android:layout_width="match_parent"
-        android:layout_weight="9"
-        android:layout_height="0dp"
+    <RelativeLayout
         android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
-
-    <Button
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:id="@+id/searchBtn"
-        android:text="장소검색"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+    </RelativeLayout>
+
 </LinearLayout>
