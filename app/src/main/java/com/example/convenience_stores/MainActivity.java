@@ -71,17 +71,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        btn = findViewById(R.id.btn);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SearchMap.class);
-                startActivity(intent);
-            }
-        });
-
-
     }
 
     // KeyHash 얻는 코드
