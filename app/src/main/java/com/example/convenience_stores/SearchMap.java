@@ -4,6 +4,7 @@ package com.example.convenience_stores;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -16,10 +17,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import net.daum.mf.map.api.MapCircle;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
@@ -32,7 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchMap extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
 
-    private static final String LOG_TAG = "MainActivity";
+    private static final String LOG_TAG = "SearchMapActivity";
 
     // New code
     private MapView mapView;
@@ -45,6 +48,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
     // 앱을 실행하기 위해 필요한 퍼미션 정의
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
     
+    // 편의점 이름
     private String name;    // 편의점 이름
 
     // Snackbar를 사용하기 위해서는 view 필요
@@ -61,6 +65,9 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
         mapViewContainer = (ViewGroup)findViewById(R.id.map);
         mapViewContainer.addView(mapView);
 
+        // Intent 로부터 편의점 이름 받아오기
+        name = getIntent().getStringExtra("place");
+        
         if(!checkLocationServicesStatus()){
             // GPS 활성화
             showDialogForLocationServiceSetting();
@@ -72,7 +79,91 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
             // 현 위치 잡기
             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
         }
-//        searchKeyword("인하대 CU");
+
+        Button makeCircleBtn = findViewById(R.id.makeCircleBtn);
+        Button searchBtn = findViewById(R.id.searchBtn);
+        searchBtn.setText("주변 " + name + "검색하기");
+
+        makeCircleBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MapPoint mapPoint = mapView.getMapCenterPoint();
+                MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
+
+                // 중심점으로부터 반지름이 500인 원 추가
+                MapCircle mapCircle = new MapCircle(mapPoint, 500, 1, R.color.teal_200);
+                mapView.addCircle(mapCircle);
+            }
+        });
+
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 현재 지도 화면의 중심점을 조회한다.
+                // 반환 : 현재 지도 화면의 중심점 --> 지도를 옮기면 변한다
+                MapPoint mapPoint = mapView.getMapCenterPoint();
+                
+                // MapPoint 객체가 나타내는 지점의 좌표값을 위경도 좌표시스템(WGS84)의 좌표값으로 조회한다.
+                // 반환 : 위경도 좌표시스템(WGS84)의 좌표값
+                MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
+
+                // 위, 경도
+                double latitude = geoCoordinate.latitude;
+                double longitude = geoCoordinate.longitude;
+
+                Log.e(LOG_TAG, "위도 : " + Double.toString(latitude));
+                Log.e(LOG_TAG, "경도 : " + Double.toString(longitude));
+
+                // Retrofit 생성
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(BASE_URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                KakaoAPI api = retrofit.create(KakaoAPI.class);     // 통신 인터페이스 객체로 생성
+
+                // 검색 조건 입력
+                Call<ResultSearchKeyword> call =
+                        api.getSearchKeyword(
+                                API_KEY,
+                                name,
+                                Double.toString(longitude),
+                                Double.toString(latitude),
+                                500);
+
+                // API 서버에 요청
+                call.enqueue(new Callback<ResultSearchKeyword>() {
+                    // 통신 성공 시 -> 검색 결과는 response.body()에 담김
+                    @Override
+                    public void onResponse(Call<ResultSearchKeyword> call, Response<ResultSearchKeyword> response) {
+                        Log.e("TEST", "Raw : " + response.raw());
+                        Log.e("TEST", "Body : " + response.body().documents);
+
+                        for(Place document : response.body().documents){
+                            Log.e("TEST", document.place_name);
+
+                            // 마커 추가
+                            MapPOIItem marker = new MapPOIItem();
+                            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(Double.parseDouble(document.y), Double.parseDouble(document.x));
+                            marker.setItemName(document.place_name);
+                            marker.setTag(0);
+                            marker.setMapPoint(mapPoint);
+                            marker.setMarkerType(MapPOIItem.MarkerType.BluePin);        // 기본 마커 모양
+                            marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 클릭 시 바뀌는 모양
+
+                            mapView.addPOIItem(marker);
+                        }
+                        Log.e("TEST", "마커 추가 성공");
+                    }
+
+                    // 통신 실패 시
+                    @Override
+                    public void onFailure(Call call, Throwable t) {
+                        Log.e("TEST", "통신 실패");
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -144,7 +235,8 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
             // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식한다.)
             // 3.  위치 값을 가져올 수 있음
 
-        } else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요하다. 2가지 경우(3-1, 4-1)가 있다.
+        }
+        else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요하다. 2가지 경우(3-1, 4-1)가 있다.
             // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우에는
             if (ActivityCompat.shouldShowRequestPermissionRationale(SearchMap.this, REQUIRED_PERMISSIONS[0])) {
                 // 3-2. 요청을 진행하기 전에 사용자가에게 퍼미션이 필요한 이유를 설명해줄 필요가 있다.
@@ -152,7 +244,8 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                 // 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionsResult에서 수신된다.
                 ActivityCompat.requestPermissions(SearchMap.this, REQUIRED_PERMISSIONS,
                         PERMISSIONS_REQUEST_CODE);
-            } else {
+            }
+            else {
                 // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 합니다.
                 // 요청 결과는 onRequestPermissionsResult에서 수신된다.
                 ActivityCompat.requestPermissions(SearchMap.this, REQUIRED_PERMISSIONS,
@@ -210,52 +303,53 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
-
-    // 키워드 검색 함수
-    private void searchKeyword(String keyword){
-        // Retrofit 구성
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        KakaoAPI api = retrofit.create(KakaoAPI.class);                             // 통신 인터페이스 객체로 생성
-        Call<ResultSearchKeyword> call = api.getSearchKeyword(API_KEY, keyword);    // 검색 조건 입력
-
-        // API 서버에 요청
-        call.enqueue(new Callback<ResultSearchKeyword>() {
-            // 통신 성공 시 -> 검색 결과는 response.body()에 담김
-            @Override
-            public void onResponse(Call<ResultSearchKeyword> call, Response<ResultSearchKeyword> response) {
-                Log.e("TEST", "Raw : " + response.raw());
-                Log.e("TEST", "Body : " + response.body().documents);
-
-                for(Place document : response.body().documents){
-                    Log.e("TEST", document.place_name);
-                    Log.e("TEST", document.x);
-                    Log.e("TEST", document.y);
-
-                    // 마커 추가
-                    MapPOIItem marker = new MapPOIItem();
-                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(Double.parseDouble(document.y), Double.parseDouble(document.x));
-                    marker.setItemName(document.place_name);
-                    marker.setTag(0);
-                    marker.setMapPoint(mapPoint);
-                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);        // 기본 마커 모양
-                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 클릭 시 바뀌는 모양
-
-                    mapView.addPOIItem(marker);
-                }
-                Log.e("TEST", "마커 추가 성공");
-            }
-
-            // 통신 실패 시
-            @Override
-            public void onFailure(Call call, Throwable t) {
-                Log.e("TEST", "통신 실패");
-            }
-        });
-    }
+//
+//    // 키워드 검색 함수
+//    private void searchKeyword(String keyword){
+//        // Retrofit 구성
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl(BASE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        KakaoAPI api = retrofit.create(KakaoAPI.class);                             // 통신 인터페이스 객체로 생성
+//        Call<ResultSearchKeyword> call = api.getSearchKeyword(API_KEY, keyword);    // 검색 조건 입력
+//
+//        // API 서버에 요청
+//        call.enqueue(new Callback<ResultSearchKeyword>() {
+//            // 통신 성공 시 -> 검색 결과는 response.body()에 담김
+//            @Override
+//            public void onResponse(Call<ResultSearchKeyword> call, Response<ResultSearchKeyword> response) {
+//                Log.e("TEST", "Raw : " + response.raw());
+//                Log.e("TEST", "Body : " + response.body().documents);
+//
+//                for(Place document : response.body().documents){
+//                    Log.e("TEST", document.place_name);
+//                    Log.e("TEST", document.x);
+//                    Log.e("TEST", document.y);
+//
+//                    // 마커 추가
+//                    MapPOIItem marker = new MapPOIItem();
+//                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(Double.parseDouble(document.y), Double.parseDouble(document.x));
+//                    marker.setItemName(document.place_name);
+//                    marker.setTag(0);
+//                    marker.setMapPoint(mapPoint);
+//                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);        // 기본 마커 모양
+//                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 클릭 시 바뀌는 모양
+//
+//                    mapView.addPOIItem(marker);
+//                }
+//                Log.e("TEST", "마커 추가 성공");
+//
+//            }
+//
+//            // 통신 실패 시
+//            @Override
+//            public void onFailure(Call call, Throwable t) {
+//                Log.e("TEST", "통신 실패");
+//            }
+//        });
+//    }
 
     @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
