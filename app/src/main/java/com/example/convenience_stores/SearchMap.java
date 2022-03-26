@@ -27,6 +27,9 @@ import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,7 +70,10 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
 
         // Intent 로부터 편의점 이름 받아오기
         name = getIntent().getStringExtra("place");
-        
+
+        // override 메서드들 붙여줌
+        mapView.setCurrentLocationEventListener(this);
+
         if(!checkLocationServicesStatus()){
             // GPS 활성화
             showDialogForLocationServiceSetting();
@@ -139,6 +145,9 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                         Log.e("TEST", "Raw : " + response.raw());
                         Log.e("TEST", "Body : " + response.body().documents);
 
+                        // 기존에 찍혀있는 마커가 있으면 삭제
+                        mapView.removePOIItems(mapView.getPOIItems());
+
                         for(Place document : response.body().documents){
                             Log.e("TEST", document.place_name);
 
@@ -151,7 +160,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                             marker.setMarkerType(MapPOIItem.MarkerType.BluePin);        // 기본 마커 모양
                             marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 클릭 시 바뀌는 모양
 
-                            mapView.addPOIItem(marker);
+                            mapView.addPOIItem(marker); // 마커 추가
                         }
                         Log.e("TEST", "마커 추가 성공");
                     }
@@ -162,8 +171,13 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                         Log.e("TEST", "통신 실패");
                     }
                 });
+                Toast.makeText(getApplicationContext(), "검색이 완료되었습니다.", Toast.LENGTH_LONG).show();
             }
         });
+    }
+    
+    private void initView(){
+        // 바인딩
     }
 
     @Override
@@ -246,7 +260,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                         PERMISSIONS_REQUEST_CODE);
             }
             else {
-                // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 합니다.
+                // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 한다.
                 // 요청 결과는 onRequestPermissionsResult에서 수신된다.
                 ActivityCompat.requestPermissions(SearchMap.this, REQUIRED_PERMISSIONS,
                         PERMISSIONS_REQUEST_CODE);
@@ -353,21 +367,24 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
 
     @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
-
+        Log.e(LOG_TAG, "onCurrentLocationDeviceHeadingUpdate");
     }
 
     @Override
     public void onCurrentLocationUpdateFailed(MapView mapView) {
+        Log.e(LOG_TAG, "onCurrentLocationUpdateFailed");
 
     }
 
     @Override
     public void onCurrentLocationUpdateCancelled(MapView mapView) {
+        Log.e(LOG_TAG, "onCurrentLocationUpdateCancelled");
 
     }
 
     @Override
     public void onMapViewInitialized(MapView mapView) {
+        Log.e(LOG_TAG, "onMapViewInitialized");
 
     }
 
