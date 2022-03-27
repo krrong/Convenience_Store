@@ -11,18 +11,26 @@ import android.widget.Button;
 public class SelectEvent extends AppCompatActivity {
     Button btn_11;
     Button btn_21;
+    String place;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_event);
 
+        initView();
+        setBtnListener();
+    }
+
+    private void initView(){
         btn_11 = findViewById(R.id.btn_11);
         btn_21 = findViewById(R.id.btn_21);
 
         Intent intent = getIntent();
-        String place = intent.getStringExtra("place");
+        place = intent.getStringExtra("place");
+    }
 
+    private void setBtnListener(){
         btn_11.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

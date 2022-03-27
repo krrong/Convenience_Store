@@ -4,7 +4,6 @@ package com.example.convenience_stores;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -27,9 +26,6 @@ import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,6 +43,9 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     private String BASE_URL = "https://dapi.kakao.com/";
     private String API_KEY = "KakaoAK a2d69db3c795c70fb4bcb73b7794abfb";
+    private Button makeCircleBtn;       // 원 생성 버튼
+    private Button searchBtn;           // 편의점 검색 버튼
+    private int radius = 500;           // 검색 반경 거리
 
     // 앱을 실행하기 위해 필요한 퍼미션 정의
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
@@ -63,16 +62,8 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
 
         setContentView(R.layout.activity_search_map);
 
-        // 지도 띄우기
-        mapView = new MapView(this);
-        mapViewContainer = (ViewGroup)findViewById(R.id.map);
-        mapViewContainer.addView(mapView);
-
-        // Intent 로부터 편의점 이름 받아오기
-        name = getIntent().getStringExtra("place");
-
-        // override 메서드들 붙여줌
-        mapView.setCurrentLocationEventListener(this);
+        initView();
+        setBtnListener();
 
         if(!checkLocationServicesStatus()){
             // GPS 활성화
@@ -85,19 +76,37 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
             // 현 위치 잡기
             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
         }
+    }
 
-        Button makeCircleBtn = findViewById(R.id.makeCircleBtn);
-        Button searchBtn = findViewById(R.id.searchBtn);
+    private void initView(){
+        // 바인딩
+
+        // 지도 띄우기
+        mapView = new MapView(this);
+        mapViewContainer = (ViewGroup)findViewById(R.id.map);
+        mapViewContainer.addView(mapView);
+
+        // override 메서드들 붙여줌
+        mapView.setCurrentLocationEventListener(this);
+
+        // Intent 로부터 편의점 이름 받아오기
+        name = getIntent().getStringExtra("place");
+
+        // 버튼 바인딩
+        searchBtn = findViewById(R.id.searchBtn);
+        makeCircleBtn = findViewById(R.id.makeCircleBtn);
         searchBtn.setText("주변 " + name + "검색하기");
+    }
 
+    private void setBtnListener(){
         makeCircleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MapPoint mapPoint = mapView.getMapCenterPoint();
                 MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
 
-                // 중심점으로부터 반지름이 500인 원 추가
-                MapCircle mapCircle = new MapCircle(mapPoint, 500, 1, R.color.teal_200);
+                // 중심점으로부터 반지름이 radius인 추가
+                MapCircle mapCircle = new MapCircle(mapPoint, radius, 1, R.color.teal_200);
                 mapView.addCircle(mapCircle);
             }
         });
@@ -108,7 +117,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                 // 현재 지도 화면의 중심점을 조회한다.
                 // 반환 : 현재 지도 화면의 중심점 --> 지도를 옮기면 변한다
                 MapPoint mapPoint = mapView.getMapCenterPoint();
-                
+
                 // MapPoint 객체가 나타내는 지점의 좌표값을 위경도 좌표시스템(WGS84)의 좌표값으로 조회한다.
                 // 반환 : 위경도 좌표시스템(WGS84)의 좌표값
                 MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
@@ -135,7 +144,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                                 name,
                                 Double.toString(longitude),
                                 Double.toString(latitude),
-                                500);
+                                radius);
 
                 // API 서버에 요청
                 call.enqueue(new Callback<ResultSearchKeyword>() {
@@ -164,20 +173,16 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
                         }
                         Log.e("TEST", "마커 추가 성공");
                     }
-
                     // 통신 실패 시
                     @Override
                     public void onFailure(Call call, Throwable t) {
                         Log.e("TEST", "통신 실패");
                     }
                 });
+
                 Toast.makeText(getApplicationContext(), "검색이 완료되었습니다.", Toast.LENGTH_LONG).show();
             }
         });
-    }
-    
-    private void initView(){
-        // 바인딩
     }
 
     @Override

@@ -32,19 +32,23 @@ public class MainActivity extends AppCompatActivity {
     Button cu_btn;
     Button seven_btn;
     Button gs_btn;
-    Button btn;
 
-    private MapView mapView;
-    private ViewGroup mapViewContainer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initView();
+        setBtnListener();
+    }
+
+    private void initView(){
         cu_btn = findViewById(R.id.cu_btn);
         seven_btn = findViewById(R.id.seven_btn);
         gs_btn = findViewById(R.id.gs_btn);
+    }
 
+    private void setBtnListener(){
         cu_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
