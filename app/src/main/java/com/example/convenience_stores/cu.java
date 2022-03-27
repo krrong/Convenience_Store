@@ -43,6 +43,8 @@ public class cu extends AppCompatActivity {
     private TextView countTextView; // n/m 표기위한 텍스트뷰
     private TextView pageInfo;      // 편의점, 행사 표기 텍스트뷰
     private String msg;             // n/m 표기위한 메시지
+    private String place;           // 편의점 이름
+    private String event;           // 선택한 행사
 
     private boolean isLoading = false;  // 로딩중 표시
     private int loadLength = 20;        // 받아올 데이터 개수
@@ -56,12 +58,9 @@ public class cu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cu);
 
-        Intent intent = getIntent();
-        String place = intent.getStringExtra("place");
-        String event = intent.getStringExtra("event");
-
-        dataParsing(place, event);  // 편의점, 행사에 맞춰 알맞는 파일 읽어서 데이터 파싱
-        initSetting(intent);        // 초기 설정
+        dataParsing();              // 편의점, 행사에 맞춰 알맞는 파일 읽어서 데이터 파싱
+        initView();                 // 초기 설정
+        setBtnListener();           // 버튼 리스터 설정
         changeCountText(loadLength);// n/m개 텍스트 뷰 보이도록 초기설정
         dataLoad();                 // 배열에 저장한 데이터 loadLength(20개) 만큼 추가하기
         initAdapter();              // 어댑터 연결하기
@@ -70,14 +69,28 @@ public class cu extends AppCompatActivity {
     }
 
     // 초기 설정
-    private void initSetting(Intent intent){
+    private void initView(){
         rtn_btn = findViewById(R.id.rtn_btn);
         countTextView = findViewById(R.id.countTextView);
         pageInfo = findViewById(R.id.pageInfo);
         recyclerView = findViewById(R.id.recycler);
         lowerBtn = findViewById(R.id.lowerBtn);
         searchBtn = findViewById(R.id.searchMapBtn);
+        search = findViewById(R.id.editText);
 
+
+        // 선택한 편의점에 맞도록 text구성
+        searchBtn.setText("주변 " + place + "찾기");
+
+        if (event.equals("11")){
+            pageInfo.setText(place + " 1 + 1 행사");
+        }
+        else {
+            pageInfo.setText(place + " 2 + 1 행사");
+        }
+    }
+
+    private void setBtnListener(){
         rtn_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -85,11 +98,6 @@ public class cu extends AppCompatActivity {
             }
         });
 
-        String place = intent.getStringExtra("place");
-        String event = intent.getStringExtra("event");
-
-        // 선택한 편의점에 맞도록 text구성
-        searchBtn.setText("주변 " + place + "찾기");
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,21 +110,14 @@ public class cu extends AppCompatActivity {
         lowerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    recyclerView.scrollToPosition(recyclerView.getAdapter().getItemCount()-1);
+                recyclerView.scrollToPosition(recyclerView.getAdapter().getItemCount()-1);
                 Log.e("nameList 개수 : ", Integer.toString(nameList.length));
                 Log.e("Adapter 데이터 개수 : ", Integer.toString(recyclerView.getAdapter().getItemCount()-1));
-                    if(nameList.length == recyclerView.getAdapter().getItemCount()){
-                        Toast.makeText(view.getContext(), "모두 내렸습니다.", Toast.LENGTH_SHORT).show();
-                    }
+                if(nameList.length == recyclerView.getAdapter().getItemCount()){
+                    Toast.makeText(view.getContext(), "모두 내렸습니다.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
-        if (event.equals("11")){
-            pageInfo.setText(place + " 1 + 1 행사");
-        }
-        else {
-            pageInfo.setText(place + " 2 + 1 행사");
-        }
     }
 
     // n/m 텍스트 표시
@@ -126,7 +127,11 @@ public class cu extends AppCompatActivity {
     }
 
     // 상품, 가격, 링크를 [res] -> [raw] -> [.txt]파일로부터 읽어와 배열에 저장
-    private void dataParsing(String place, String event){
+    private void dataParsing(){
+        Intent intent = getIntent();
+        place = intent.getStringExtra("place");
+        event = intent.getStringExtra("event");
+
         InputStream inName;
         InputStream inPrice;
         InputStream inUrl;
@@ -215,7 +220,6 @@ public class cu extends AppCompatActivity {
 
     // 검색창관련 메서드 정리
     private void initEditText(){
-        search = findViewById(R.id.editText);
         search.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -272,16 +276,20 @@ public class cu extends AppCompatActivity {
                 // 스크롤이 최하단일 경우
                 else if(!recyclerView.canScrollVertically(1)){
                     Log.e("메세지", "최하단");
-                    System.out.println(adapter.getItemCount());
 
-                    LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
-                    System.out.println(layoutManager.findLastVisibleItemPosition());
+                    // 검색어가 입력이 되지 않은 상태에서만 추가 로드
+                    if(search.getText().toString().equals("")){
+                        System.out.println(adapter.getItemCount());
 
-                    if(!isLoading){
-                        // 배열의 마지막이면 loadMore 함수를 이용하여 추가로드
-                        if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == adapter.getItemCount() -1){
-                            loadMore(place);
-                            isLoading = true;   // 2초후에 실행되는 loadMore에서 false로 바꿔줌
+                        LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+                        System.out.println(layoutManager.findLastVisibleItemPosition());
+
+                        if(!isLoading){
+                            // 배열의 마지막이면 loadMore 함수를 이용하여 추가로드
+                            if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == adapter.getItemCount() -1){
+                                loadMore(place);
+                                isLoading = true;   // 2초후에 실행되는 loadMore에서 false로 바꿔줌
+                            }
                         }
                     }
                 }
