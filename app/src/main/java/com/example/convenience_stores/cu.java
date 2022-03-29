@@ -62,10 +62,10 @@ public class cu extends AppCompatActivity {
         initView();                 // 초기 설정
         setBtnListener();           // 버튼 리스터 설정
         changeCountText(loadLength);// n/m개 텍스트 뷰 보이도록 초기설정
-        dataLoad();                 // 배열에 저장한 데이터 loadLength(20개) 만큼 추가하기
+        dataLoad();                 // 배열에 저장한 데이터를 adapter에 singlieItem 객체로 추가하기
         initAdapter();              // 어댑터 연결하기
-        initScrollListener(place);
-        initEditText();             // 검색창 검색했을 때
+//        initScrollListener(place);
+        initEditText();             // 검색창관련 메서드 정리
     }
 
     // 초기 설정
@@ -200,9 +200,10 @@ public class cu extends AppCompatActivity {
         }
     }
 
-    // 처음 실행하는 데이터 로드 함수(loadLength)개의 데이터 로드
+    // 데이터 로드 (전체 데이터 한번에 로드)
     private void dataLoad(){
-        for(int i=0; i<loadLength; i++){
+        int stride = nameList.length;
+        for(int i=0; i<stride; i++){
             adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
         }
         // 현재 리스트 임시 저장(필터링 시 재사용 위함)
@@ -257,84 +258,84 @@ public class cu extends AppCompatActivity {
         });
     }
 
-    // 스크롤 관련 메서드 정리
-    private void initScrollListener(String place){
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            // 사용자가 스크롤을 움직이는 동안 반복하여 호출됨
-            public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-            }
-
-            @Override
-            public void onScrollStateChanged(@NonNull @NotNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                // 스크롤이 최상단일 경우
-                if(!recyclerView.canScrollVertically(-1)){
-                    Log.e("메세지", "최상단");
-                }
-                // 스크롤이 최하단일 경우
-                else if(!recyclerView.canScrollVertically(1)){
-                    Log.e("메세지", "최하단");
-
-                    // 검색어가 입력이 되지 않은 상태에서만 추가 로드
-                    if(search.getText().toString().equals("")){
-                        System.out.println(adapter.getItemCount());
-
-                        LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
-                        System.out.println(layoutManager.findLastVisibleItemPosition());
-
-                        if(!isLoading){
-                            // 배열의 마지막이면 loadMore 함수를 이용하여 추가로드
-                            if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == adapter.getItemCount() -1){
-                                loadMore(place);
-                                isLoading = true;   // 2초후에 실행되는 loadMore에서 false로 바꿔줌
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // 추가로 로드하는 함수
-    private void loadMore(String place){
-        // progressBar 보기 위한 null 데이터 추가
-        adapter.addItem(null);
-        adapter.notifyItemInserted(adapter.getItemCount());
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // null 데이터 삭제
-                adapter.getItems().remove(adapter.getItemCount() - 1);
-                int scrollPosition = adapter.getItemCount();
-                adapter.notifyItemRemoved(scrollPosition);
-                int currentSize = scrollPosition;
-                int nextLimit = currentSize + loadLength;
-
-                // nextLimit이 전체 상품 개수보다 크면 수동으로 크기 설정
-                if(nextLimit > nameList.length - 1){
-                    nextLimit = nameList.length - 1;
-                }
-
-                // 아이템 추가
-                while(currentSize - 1 < nextLimit){
-                    adapter.addItem(new singleItem(nameList[currentSize], priceList[currentSize], urlList[currentSize]));
-                    currentSize++;
-                }
-
-                // n/m개 텍스트 뷰 변경
-                changeCountText(currentSize);
-                
-                adapter.notifyDataSetChanged();
-                isLoading = false;
-
-                // 현재 리스트 임시 저장(필터링 시 재사용 위함)
-                originalList = adapter.getItems();
-            }
-
-        }, 1000);
-    }
+//    // 스크롤 관련 메서드 정리
+//    private void initScrollListener(String place){
+//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            // 사용자가 스크롤을 움직이는 동안 반복하여 호출됨
+//            public void onScrolled(@NonNull @NotNull RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//            }
+//
+//            @Override
+//            public void onScrollStateChanged(@NonNull @NotNull RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                // 스크롤이 최상단일 경우
+//                if(!recyclerView.canScrollVertically(-1)){
+//                    Log.e("메세지", "최상단");
+//                }
+//                // 스크롤이 최하단일 경우
+//                else if(!recyclerView.canScrollVertically(1)){
+//                    Log.e("메세지", "최하단");
+//
+//                    // 검색어가 입력이 되지 않은 상태에서만 추가 로드
+//                    if(search.getText().toString().equals("")){
+//                        System.out.println(adapter.getItemCount());
+//
+//                        LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+//                        System.out.println(layoutManager.findLastVisibleItemPosition());
+//
+//                        if(!isLoading){
+//                            // 배열의 마지막이면 loadMore 함수를 이용하여 추가로드
+//                            if(layoutManager != null && layoutManager.findLastVisibleItemPosition() == adapter.getItemCount() -1){
+//                                loadMore(place);
+//                                isLoading = true;   // 2초후에 실행되는 loadMore에서 false로 바꿔줌
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        });
+//    }
+//
+//    // 추가로 로드하는 함수
+//    private void loadMore(String place){
+//        // progressBar 보기 위한 null 데이터 추가
+//        adapter.addItem(null);
+//        adapter.notifyItemInserted(adapter.getItemCount());
+//
+//        Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                // null 데이터 삭제
+//                adapter.getItems().remove(adapter.getItemCount() - 1);
+//                int scrollPosition = adapter.getItemCount();
+//                adapter.notifyItemRemoved(scrollPosition);
+//                int currentSize = scrollPosition;
+//                int nextLimit = currentSize + loadLength;
+//
+//                // nextLimit이 전체 상품 개수보다 크면 수동으로 크기 설정
+//                if(nextLimit > nameList.length - 1){
+//                    nextLimit = nameList.length - 1;
+//                }
+//
+//                // 아이템 추가
+//                while(currentSize - 1 < nextLimit){
+//                    adapter.addItem(new singleItem(nameList[currentSize], priceList[currentSize], urlList[currentSize]));
+//                    currentSize++;
+//                }
+//
+//                // n/m개 텍스트 뷰 변경
+//                changeCountText(currentSize);
+//
+//                adapter.notifyDataSetChanged();
+//                isLoading = false;
+//
+//                // 현재 리스트 임시 저장(필터링 시 재사용 위함)
+//                originalList = adapter.getItems();
+//            }
+//
+//        }, 1000);
+//    }
 }
