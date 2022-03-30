@@ -10,7 +10,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.ClipData;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
@@ -20,13 +26,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class test extends FragmentActivity {
+public class test extends AppCompatActivity {
+    private ArrayList<singleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
+    private ArrayList<singleItem> searchList = new ArrayList<>();       // 빈 리스트, 검색 데이터 저장 용도
 
-    ViewPager2 viewPager2;
-    TabLayout tabLayout;
-    FragmentAdapter adapter;
-    ArrayList<Fragment> fragments = new ArrayList<Fragment>();
-    ArrayList<String> tabTitles = new ArrayList<String>();
+    private RecyclerView recyclerView;
+    private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>());
+    private EditText editTextTest;
+
+    String[] nameList;
+    String[] priceList;
+    String[] urlList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,30 +44,71 @@ public class test extends FragmentActivity {
         setContentView(R.layout.activity_test);
 
         initView();
-
+        initEditText();
     }
 
     void initView(){
-        viewPager2 = (ViewPager2) findViewById(R.id.viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        adapter = new FragmentAdapter(this);
+        Intent intent = getIntent();
+        recyclerView = (RecyclerView) findViewById(R.id.RecyclerViewTest);
+        editTextTest = (EditText) findViewById(R.id.editTextTest);
 
-        fragments.add(new onePlusOneFragment());
-        fragments.add(new twoPlusOneFragment());
+        // intent에서 값 받아오기
+        nameList = intent.getStringArrayExtra("nameList");
+        priceList = intent.getStringArrayExtra("priceList");
+        urlList = intent.getStringArrayExtra("urlList");
 
-        tabTitles.add("1+1");
-        tabTitles.add("2+1");
+        // adapter 에 아이템 추가
+        for(int i = 0; i < nameList.length; i++){
+            adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
+        }
+        // originalList 는 모든 상품이 들어가 있는 상태로 세팅
+        originalList = adapter.getItems();
+        
+        // adapter 를 데이터가 없는 searchList 로 세팅(초기에 아무것도 보여주지 않기 위함)
+        adapter.filterList(searchList);
 
-        adapter.fragmentArrayList = fragments;
+        // recyclerView <-> adapter 연결
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+    }
 
-        viewPager2.setAdapter(adapter);
-        new TabLayoutMediator(tabLayout, viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
+    // 검색창관련 메서드 정리
+    private void initEditText(){
+        editTextTest.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onConfigureTab(@NonNull @NotNull TabLayout.Tab tab, int position) {
-                TextView textView = new TextView(test.this);
-                textView.setText(tabTitles.get(position));
-                tab.setCustomView(textView);
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
             }
-        }).attach();
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String searchText = editTextTest.getText().toString();
+                searchFilter(searchText);
+            }
+
+            public void searchFilter(String searchText){
+                // == 대신 equals사용 해야함
+                // "" 이면 검색어를 지운 것이므로 아무것도 보이지 않도록 동작(searchList 를 clear() 해서 사용)
+                if(searchText.equals("")){
+                    searchList.clear();
+                    adapter.filterList(searchList);
+                }
+                // searchText 를 포함하는 아이템들만 보이도록 동작(searchList 사용)
+                else{
+                    searchList.clear();
+                    for(int i = 0; i < originalList.size(); i++){
+                        if(originalList.get(i).getName().toLowerCase().contains(searchText.toLowerCase())){
+                            searchList.add(originalList.get(i));
+                        }
+                    }
+                    adapter.filterList(searchList);
+                }
+            }
+        });
     }
 }
