@@ -30,9 +30,10 @@ public class twoPlusOneFragment extends Fragment {
         // Inflate the layout for this fragment
         ViewGroup viewGroup = (ViewGroup)inflater.inflate(R.layout.fragment_two_plus_one, container, false);
 
-        dataParsing();
-        dataLoad();
+        dataParsing();  // 데이터 파싱
+        dataLoad();     // 데이터 로드
 
+        // 리사이클러뷰 바인딩 및 어댑터와 연결
         recyclerView = (RecyclerView)viewGroup.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
