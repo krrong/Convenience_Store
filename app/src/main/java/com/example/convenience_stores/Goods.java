@@ -8,6 +8,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,13 +22,17 @@ import java.util.ArrayList;
 
 public class Goods extends FragmentActivity {
     private Button searchConvenience;
+    private Button searchGoods;
     private String place;
+    private String[] nameList;
+    private String[] priceList;
+    private String[] urlList;
 
-    private ViewPager2 viewPager2;
-    private TabLayout tabLayout;
-    private FragmentAdapter adapter;
-    private ArrayList<Fragment> fragments = new ArrayList<Fragment>();
-    private ArrayList<String> tabTitles = new ArrayList<String>();
+    private ViewPager2 viewPager2;                              // 뷰페이저
+    private TabLayout tabLayout;                                // 레이아웃
+    private FragmentAdapter adapter;                            // 뷰페이저 어댑터
+    private ArrayList<Fragment> fragments = new ArrayList<Fragment>(); // 1+1, 2+1 프래그먼트 담을 ArrayList
+    private ArrayList<String> tabTitles = new ArrayList<String>();   // 1+1, 2+1 탭 타이틀 담을 ArrayList
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,16 +41,25 @@ public class Goods extends FragmentActivity {
 
         initView();
         setListener();
+
     }
 
+    // 초기 세팅
     private void initView(){
         Intent intent = getIntent();
-        place = intent.getStringExtra("place");
+        place = intent.getStringExtra("place"); // 선택한 편의점 받아오기
+        nameList = intent.getStringArrayExtra("nameList");
+        priceList = intent.getStringArrayExtra("priceList");
+        urlList = intent.getStringArrayExtra("urlList");
 
+        // binding
         viewPager2 = (ViewPager2) findViewById(R.id.viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         searchConvenience = (Button) findViewById(R.id.searchConvenience);
+        searchGoods = (Button) findViewById(R.id.searchGoods);
         adapter = new FragmentAdapter(this);
+
+        searchConvenience.setText("주변 " + place + "검색하기");
 
         // 번들 객체 생성
         Bundle bundle = new Bundle();
@@ -59,12 +73,15 @@ public class Goods extends FragmentActivity {
         fragments.get(0).setArguments(bundle);
         fragments.get(1).setArguments(bundle);
 
+        // 탭 타이틀 추가
         tabTitles.add("1+1");
         tabTitles.add("2+1");
 
         adapter.fragmentArrayList = fragments;
 
+        // 뷰페이저에 어댑터 연결
         viewPager2.setAdapter(adapter);
+        
         new TabLayoutMediator(tabLayout, viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
             public void onConfigureTab(@NonNull @NotNull TabLayout.Tab tab, int position) {
@@ -81,6 +98,17 @@ public class Goods extends FragmentActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SearchMap.class);
                 intent.putExtra("place", place);
+                startActivity(intent);
+            }
+        });
+
+        searchGoods.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), test.class);
+                intent.putExtra("nameList", nameList);
+                intent.putExtra("priceList", priceList);
+                intent.putExtra("urlList", urlList);
                 startActivity(intent);
             }
         });
