@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     Button cu_btn;
     Button seven_btn;
     Button gs_btn;
+    Button test_btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         cu_btn = findViewById(R.id.cu_btn);
         seven_btn = findViewById(R.id.seven_btn);
         gs_btn = findViewById(R.id.gs_btn);
+        test_btn = findViewById(R.id.test);
     }
 
     private void setBtnListener(){
@@ -72,6 +74,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SelectEvent.class);
                 intent.putExtra("place","GS25");
+                startActivity(intent);
+            }
+        });
+
+        test_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), test.class);
                 startActivity(intent);
             }
         });

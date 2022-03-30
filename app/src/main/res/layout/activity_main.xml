@@ -38,4 +38,14 @@
         android:layout_margin="10sp"
         android:text="GS25" />
 
+    <Button
+        android:id="@+id/test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gsBackground"
+        android:textColor="@color/gsText"
+        android:textStyle="bold"
+        android:layout_margin="10sp"
+        android:text="test" />
+
 </LinearLayout>
