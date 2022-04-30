@@ -17,9 +17,6 @@ public class twoPlusOneFragment extends Fragment {
     private RecyclerView recyclerView;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>());
 
-    private ArrayList<singleItem> searchList = new ArrayList<>();       // 검색한 단어와 일치하는 리스트 저장 용도
-    private ArrayList<singleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
-
     private String[] nameList;  // 이름 배열
     private String[] priceList; // 가격 배열
     private String[] urlList;   // 링크 배열
@@ -55,7 +52,5 @@ public class twoPlusOneFragment extends Fragment {
         for(int i=0; i<stride; i++){
             adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
         }
-        // 현재 리스트 임시 저장(필터링 시 재사용 위함)
-        originalList = adapter.getItems();
     }
 }
