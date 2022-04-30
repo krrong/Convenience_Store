@@ -24,6 +24,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class test extends AppCompatActivity {
@@ -37,33 +38,40 @@ public class test extends AppCompatActivity {
     String[] nameList;
     String[] priceList;
     String[] urlList;
+    String place;           // 선택한 편의점 이름
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
+        getData();
         initView();
         initEditText();
     }
 
-    void initView(){
+    // intent로부터 데이터를 얻어옴
+    private void getData(){
         Intent intent = getIntent();
-        recyclerView = (RecyclerView) findViewById(R.id.RecyclerViewTest);
-        editTextTest = (EditText) findViewById(R.id.editTextTest);
+        place = intent.getStringExtra("place");
 
-        // intent에서 값 받아오기
         nameList = intent.getStringArrayExtra("nameList");
         priceList = intent.getStringArrayExtra("priceList");
         urlList = intent.getStringArrayExtra("urlList");
+    }
+
+    // 초기 세팅
+    void initView() {
+        recyclerView = (RecyclerView) findViewById(R.id.RecyclerViewTest);
+        editTextTest = (EditText) findViewById(R.id.editTextTest);
 
         // adapter 에 아이템 추가
-        for(int i = 0; i < nameList.length; i++){
+        for (int i = 0; i < nameList.length; i++) {
             adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
         }
         // originalList 는 모든 상품이 들어가 있는 상태로 세팅
         originalList = adapter.getItems();
-        
+
         // adapter 를 데이터가 없는 searchList 로 세팅(초기에 아무것도 보여주지 않기 위함)
         adapter.filterList(searchList);
 
@@ -73,7 +81,7 @@ public class test extends AppCompatActivity {
     }
 
     // 검색창관련 메서드 정리
-    private void initEditText(){
+    private void initEditText() {
         editTextTest.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -91,18 +99,18 @@ public class test extends AppCompatActivity {
                 searchFilter(searchText);
             }
 
-            public void searchFilter(String searchText){
+            public void searchFilter(String searchText) {
                 // == 대신 equals사용 해야함
                 // "" 이면 검색어를 지운 것이므로 아무것도 보이지 않도록 동작(searchList 를 clear() 해서 사용)
-                if(searchText.equals("")){
+                if (searchText.equals("")) {
                     searchList.clear();
                     adapter.filterList(searchList);
                 }
                 // searchText 를 포함하는 아이템들만 보이도록 동작(searchList 사용)
-                else{
+                else {
                     searchList.clear();
-                    for(int i = 0; i < originalList.size(); i++){
-                        if(originalList.get(i).getName().toLowerCase().contains(searchText.toLowerCase())){
+                    for (int i = 0; i < originalList.size(); i++) {
+                        if (originalList.get(i).getName().toLowerCase().contains(searchText.toLowerCase())) {
                             searchList.add(originalList.get(i));
                         }
                     }
