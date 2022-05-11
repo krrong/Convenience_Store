@@ -81,6 +81,12 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.items = list;
     }
 
+    // 인자로 받은 리스트로 수정
+    public void setItems(ArrayList<singleItem> items) {
+        this.items = items;
+        notifyDataSetChanged();
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if(viewType == VIEW_TYPE_ITEM){
@@ -137,7 +143,6 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void showLoadingView(LoadingViewHolder holder, int position) {
 
     }
-
 }
 
 
