@@ -13,13 +13,9 @@ import android.view.ViewGroup;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class twoPlusOneFragment extends Fragment {
+public class twoPlusOneFragment extends GoodBaseFragment {
     private RecyclerView recyclerView;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>());
-
-    private String[] nameList;  // 이름 배열
-    private String[] priceList; // 가격 배열
-    private String[] urlList;   // 링크 배열
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -27,30 +23,18 @@ public class twoPlusOneFragment extends Fragment {
         // Inflate the layout for this fragment
         ViewGroup viewGroup = (ViewGroup)inflater.inflate(R.layout.fragment_two_plus_one, container, false);
 
-        getData();
-        dataLoad();     // 데이터 로드
-
-        // 리사이클러뷰 바인딩 및 어댑터와 연결
-        recyclerView = (RecyclerView)viewGroup.findViewById(R.id.recyclerView);
+        // 리사이클러뷰 바인딩, 어댑터와 연결
+        recyclerView = (RecyclerView) viewGroup.findViewById(R.id.twoPlusOneRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
         return viewGroup;
     }
 
-    // Goods 액티비티에서 Bundle 객체를 이용하여 데이터를 받아오는 함수
-    private void getData(){
-        Bundle bundle = getArguments();
-        nameList = bundle.getStringArray("nameList");
-        priceList = bundle.getStringArray("priceList");
-        urlList = bundle.getStringArray("urlList");
-    }
-
-    // 데이터 로드 (전체 데이터 한번에 로드)
-    private void dataLoad(){
-        int stride = nameList.length;
-        for(int i=0; i<stride; i++){
-            adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
-        }
+    @Override
+    public void setData(ArrayList<singleItem> goodList) {
+        // 리사이클러뷰의 어댑터를 받아와서 데이터 수정
+        adapter = (ItemAdapter)recyclerView.getAdapter();
+        adapter.setItems(goodList);
     }
 }
