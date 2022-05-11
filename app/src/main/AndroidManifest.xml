@@ -15,6 +15,7 @@
         android:theme="@style/Theme.Convenience_stores"
         android:usesCleartextTraffic="true">
         <activity android:name=".Goods"></activity>
+        <activity android:name=".SearchGoodActivity"></activity>
         <activity android:name=".SearchMap" />
         <activity android:name=".SelectEvent" />
         <activity android:name=".test" />
