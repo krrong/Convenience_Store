@@ -20,9 +20,10 @@ public class SearchGoodActivity extends AppCompatActivity {
     private EditText searchGoodEditText;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>());
 
-    String[] nameList;
-    String[] priceList;
-    String[] urlList;
+    mData mData;
+//    String[] nameList;
+//    String[] priceList;
+//    String[] urlList;
     String place;           // 선택한 편의점 이름
 
     @Override
@@ -39,16 +40,22 @@ public class SearchGoodActivity extends AppCompatActivity {
     private void getData(){
         Intent intent = getIntent();
         place = intent.getStringExtra("place");
+        mData = intent.getParcelableExtra("mData");
 
-        nameList = intent.getStringArrayExtra("nameList");
-        priceList = intent.getStringArrayExtra("priceList");
-        urlList = intent.getStringArrayExtra("urlList");
+//        nameList = intent.getStringArrayExtra("nameList");
+//        priceList = intent.getStringArrayExtra("priceList");
+//        urlList = intent.getStringArrayExtra("urlList");
     }
 
     void initView(){
         searchGoodRecyclerView = findViewById(R.id.searchGoodRecyclerView);
         searchGoodEditText = findViewById(R.id.searchGoodEditText);
-
+        
+        // mData 객체에서 리스트 가져오기 
+        String[] nameList = mData.getNameList();
+        String[] priceList = mData.getPriceList();
+        String[] urlList = mData.getUrlList();
+        
         // adapter 에 아이템 추가
         for (int i = 0; i < nameList.length; i++) {
             adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
