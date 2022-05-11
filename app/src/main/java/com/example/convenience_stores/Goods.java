@@ -24,11 +24,13 @@ import java.util.ArrayList;
 public class Goods extends FragmentActivity {
     private Button searchConvenience;                           // 편의점 검색 버튼
     private Button searchGoods;                                 // 상품 검색 버튼
-    private String place;                                       // 선택한 편의점
-    String[] nameList;
-    String[] priceList;
-    String[] urlList;
-    Bundle bundle = new Bundle();                               // viewPager2와 Fragment가 정보를 주고 받는 매개체
+    private String place;                                       // 선택한 편의점(get from Intent)
+    mData mData = new mData();                                  // 데이터 객체
+
+//    String[] nameList;
+//    String[] priceList;
+//    String[] urlList;
+//    Bundle bundle = new Bundle();                               // viewPager2와 Fragment가 정보를 주고 받는 매개체
 
     private ViewPager2 viewPager2;                              // 뷰페이저
     private TabLayout tabLayout;                                // 레이아웃
@@ -67,8 +69,8 @@ public class Goods extends FragmentActivity {
         // 주변 편의점 검색 버튼 텍스트
         searchConvenience.setText("주변 " + place + "검색하기");
 
-        // 번들 객체 생성
-        bundle.putString("place", place);
+//        // 번들 객체 생성
+//        bundle.putString("place", place);
 
         // 탭 타이틀 추가
         tabTitles.add("1+1");
@@ -111,9 +113,10 @@ public class Goods extends FragmentActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SearchGoodActivity.class);
                 intent.putExtra("place", place);
-                intent.putExtra("nameList", nameList);
-                intent.putExtra("priceList", priceList);
-                intent.putExtra("urlList", urlList);
+                intent.putExtra("mData", mData);
+//                intent.putExtra("nameList", nameList);
+//                intent.putExtra("priceList", priceList);
+//                intent.putExtra("urlList", urlList);
                 startActivity(intent);
             }
         });
@@ -198,26 +201,42 @@ public class Goods extends FragmentActivity {
             inUrl.read(bUrl);
 
             // byte -> string 변환
-            String s_name = new String(bName);
-            String s_price = new String(bPrice);
-            String s_url = new String(bUrl);
+            String sName = new String(bName);
+            String sPrice = new String(bPrice);
+            String sUrl = new String(bUrl);
 
             // "\n" 단위로 나누어 상품명, 가격, 이미지 url 배열에 저장
-            nameList = s_name.split("\n");
-            priceList = s_price.split("\n");
-            urlList = s_url.split("\n");
+            mData.setNameList(sName.split("\n"));
+            mData.setPriceList(sPrice.split("\n"));
+            mData.setUrlList(sUrl.split("\n"));
+
+            // mData 로부터 필요한 데이터 가져옴
+            String[] nameList = mData.getNameList();
+            String[] priceList = mData.getPriceList();
+            String[] urlList = mData.getUrlList();
 
             // fragment에 넘겨줄 데이터를 items에 담음
             ArrayList<singleItem> items = new ArrayList<>();
-            for(int i=0; i<nameList.length; i++){
+            for(int i = 0; i < nameList.length; i++){
                 items.add(new singleItem(nameList[i], priceList[i], urlList[i]));
             }
+
+//            nameList = sName.split("\n");
+//            priceList = sPrice.split("\n");
+//            urlList = sUrl.split("\n");
+
+//            // fragment에 넘겨줄 데이터를 items에 담음
+//            ArrayList<singleItem> items = new ArrayList<>();
+//            for(int i=0; i<nameList.length; i++){
+//                items.add(new singleItem(nameList[i], priceList[i], urlList[i]));
+//            }
 
             // 각 fragment에 알맞는 값 넘겨주기
             FragmentAdapter adapter = (FragmentAdapter) viewPager2.getAdapter();
             GoodBaseFragment fragment = (GoodBaseFragment) adapter.getItem(position);
             fragment.setData(items);
         }catch (Exception e){
+            e.printStackTrace();
         }
     }
 }
