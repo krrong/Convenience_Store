@@ -33,10 +33,6 @@ public class MainActivity extends AppCompatActivity {
     private Button seven_btn;
     private Button gs_btn;
 
-    private String[] nameList;
-    private String[] priceList;
-    private String[] urlList;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
