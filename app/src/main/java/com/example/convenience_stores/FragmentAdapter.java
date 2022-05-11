@@ -16,6 +16,11 @@ public class FragmentAdapter extends FragmentStateAdapter {
         super(fragmentActivity);
     }
 
+    public FragmentAdapter(@NonNull @NotNull FragmentActivity fragmentActivity, ArrayList<Fragment> fragments) {
+        super(fragmentActivity);
+        this.fragmentArrayList = fragments;
+    }
+
 
     @Override
     public Fragment createFragment(int position) {
@@ -25,5 +30,13 @@ public class FragmentAdapter extends FragmentStateAdapter {
     @Override
     public int getItemCount() {
         return fragmentArrayList.size();
+    }
+
+    // position에 맞는 fragment를 리턴
+    public Fragment getItem(int position) {
+        if (fragmentArrayList == null)
+            return null;
+
+        return fragmentArrayList.get(position);
     }
 }
