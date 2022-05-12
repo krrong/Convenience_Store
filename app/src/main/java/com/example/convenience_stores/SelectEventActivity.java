@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class SelectEvent extends AppCompatActivity {
+public class SelectEventActivity extends AppCompatActivity {
     Button btn_11;
     Button btn_21;
     String place;
@@ -37,7 +37,7 @@ public class SelectEvent extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), cu.class);
                 intent.putExtra("place",place);
                 intent.putExtra("event","11");
-                Log.e("test", "1+1버튼 클릭");
+                Log.e("TestActivity", "1+1버튼 클릭");
                 startActivity(intent);
             }
         });

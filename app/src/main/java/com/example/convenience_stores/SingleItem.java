@@ -1,12 +1,12 @@
 package com.example.convenience_stores;
 
-public class singleItem {
+public class SingleItem {
     String name;    // 상품이름
     String price;   // 상품가격
     String url;     // 상품이미지 저장링크
 
     // 생성자
-    public singleItem(String name, String price, String url){
+    public SingleItem(String name, String price, String url){
         this.name = name;
         this.price = price;
         this.url = url;

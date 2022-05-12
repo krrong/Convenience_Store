@@ -32,7 +32,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class SearchMap extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
+public class SearchMapActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
 
     private static final String LOG_TAG = "SearchMapActivity";
 
@@ -246,7 +246,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
     void checkRunTimePermission(){
         // 런타임 퍼미션 처리
         // 1. 위치 퍼미션을 가지고 있는지 체크한다.
-        int hasFineLocationPermission = ContextCompat.checkSelfPermission(SearchMap.this,
+        int hasFineLocationPermission = ContextCompat.checkSelfPermission(SearchMapActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED ) {
@@ -257,17 +257,17 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
         }
         else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요하다. 2가지 경우(3-1, 4-1)가 있다.
             // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우에는
-            if (ActivityCompat.shouldShowRequestPermissionRationale(SearchMap.this, REQUIRED_PERMISSIONS[0])) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(SearchMapActivity.this, REQUIRED_PERMISSIONS[0])) {
                 // 3-2. 요청을 진행하기 전에 사용자가에게 퍼미션이 필요한 이유를 설명해줄 필요가 있다.
-                Toast.makeText(SearchMap.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();
+                Toast.makeText(SearchMapActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();
                 // 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionsResult에서 수신된다.
-                ActivityCompat.requestPermissions(SearchMap.this, REQUIRED_PERMISSIONS,
+                ActivityCompat.requestPermissions(SearchMapActivity.this, REQUIRED_PERMISSIONS,
                         PERMISSIONS_REQUEST_CODE);
             }
             else {
                 // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 한다.
                 // 요청 결과는 onRequestPermissionsResult에서 수신된다.
-                ActivityCompat.requestPermissions(SearchMap.this, REQUIRED_PERMISSIONS,
+                ActivityCompat.requestPermissions(SearchMapActivity.this, REQUIRED_PERMISSIONS,
                         PERMISSIONS_REQUEST_CODE);
             }
         }
@@ -276,7 +276,7 @@ public class SearchMap extends AppCompatActivity implements MapView.CurrentLocat
     // 여기부터는 GPS 활성화를 위한 메소드들
     private void showDialogForLocationServiceSetting() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(SearchMap.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(SearchMapActivity.this);
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
                 + "위치 설정을 수정하시겠습니까?");

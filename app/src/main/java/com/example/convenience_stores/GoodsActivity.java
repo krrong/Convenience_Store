@@ -1,7 +1,6 @@
 package com.example.convenience_stores;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class Goods extends FragmentActivity {
+public class GoodsActivity extends FragmentActivity {
     private Button searchConvenience;                           // 편의점 검색 버튼
     private Button searchGoods;                                 // 상품 검색 버튼
     private String place;                                       // 선택한 편의점(get from Intent)
@@ -61,8 +60,8 @@ public class Goods extends FragmentActivity {
         ArrayList<Fragment> fragments = new ArrayList();
 
         // fragment 생성
-        fragments.add(new onePlusOneFragment());    // 1+1 프래그먼트
-        fragments.add(new twoPlusOneFragment());    // 2+1 프래그먼트
+        fragments.add(new OnePlusOneFragment());    // 1+1 프래그먼트
+        fragments.add(new TwoPlusOneFragment());    // 2+1 프래그먼트
 
         FragmentAdapter fragmentAdapter = new FragmentAdapter(this, fragments);
 
@@ -89,7 +88,7 @@ public class Goods extends FragmentActivity {
         new TabLayoutMediator(tabLayout, viewPager2, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
             public void onConfigureTab(@NonNull @NotNull TabLayout.Tab tab, int position) {
-                TextView textView = new TextView(Goods.this);
+                TextView textView = new TextView(GoodsActivity.this);
                 textView.setText(tabTitles.get(position));
                 tab.setCustomView(textView);
             }
@@ -102,7 +101,7 @@ public class Goods extends FragmentActivity {
         searchConvenience.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SearchMap.class);
+                Intent intent = new Intent(getApplicationContext(), SearchMapActivity.class);
                 intent.putExtra("place", place);
                 startActivity(intent);
             }
@@ -111,7 +110,7 @@ public class Goods extends FragmentActivity {
         searchGoods.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SearchGoodActivity.class);
+                Intent intent = new Intent(getApplicationContext(), SearchGoodsActivity.class);
                 intent.putExtra("place", place);
                 intent.putExtra("mData", mData);
 //                intent.putExtra("nameList", nameList);
@@ -216,9 +215,9 @@ public class Goods extends FragmentActivity {
             String[] urlList = mData.getUrlList();
 
             // fragment에 넘겨줄 데이터를 items에 담음
-            ArrayList<singleItem> items = new ArrayList<>();
+            ArrayList<SingleItem> items = new ArrayList<>();
             for(int i = 0; i < nameList.length; i++){
-                items.add(new singleItem(nameList[i], priceList[i], urlList[i]));
+                items.add(new SingleItem(nameList[i], priceList[i], urlList[i]));
             }
 
 //            nameList = sName.split("\n");
@@ -226,14 +225,14 @@ public class Goods extends FragmentActivity {
 //            urlList = sUrl.split("\n");
 
 //            // fragment에 넘겨줄 데이터를 items에 담음
-//            ArrayList<singleItem> items = new ArrayList<>();
+//            ArrayList<SingleItem> items = new ArrayList<>();
 //            for(int i=0; i<nameList.length; i++){
-//                items.add(new singleItem(nameList[i], priceList[i], urlList[i]));
+//                items.add(new SingleItem(nameList[i], priceList[i], urlList[i]));
 //            }
 
             // 각 fragment에 알맞는 값 넘겨주기
             FragmentAdapter adapter = (FragmentAdapter) viewPager2.getAdapter();
-            GoodBaseFragment fragment = (GoodBaseFragment) adapter.getItem(position);
+            GoodsBaseFragment fragment = (GoodsBaseFragment) adapter.getItem(position);
             fragment.setData(items);
         }catch (Exception e){
             e.printStackTrace();

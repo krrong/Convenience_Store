@@ -1,41 +1,28 @@
 package com.example.convenience_stores;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 public class cu extends AppCompatActivity {
-    private ArrayList<singleItem> searchList = new ArrayList<>();       // 검색한 단어와 일치하는 리스트 저장 용도
-    private ArrayList<singleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
+    private ArrayList<SingleItem> searchList = new ArrayList<>();       // 검색한 단어와 일치하는 리스트 저장 용도
+    private ArrayList<SingleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
     private RecyclerView recyclerView;
-    private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>()); // 어댑터 생성(빈 리스트)
+    private ItemAdapter adapter = new ItemAdapter(new ArrayList<SingleItem>()); // 어댑터 생성(빈 리스트)
     private Button rtn_btn;         // 돌아가기 버튼
     private Button lowerBtn;        // 아래로 이동 버튼
     private Button searchBtn;       // 주변 편의점 찾는 버튼
@@ -101,7 +88,7 @@ public class cu extends AppCompatActivity {
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SearchMap.class);
+                Intent intent = new Intent(getApplicationContext(), SearchMapActivity.class);
                 intent.putExtra("place",place);
                 startActivity(intent);
             }
@@ -204,7 +191,7 @@ public class cu extends AppCompatActivity {
     private void dataLoad(){
         int stride = nameList.length;
         for(int i=0; i<stride; i++){
-            adapter.addItem(new singleItem(nameList[i], priceList[i], urlList[i]));
+            adapter.addItem(new SingleItem(nameList[i], priceList[i], urlList[i]));
         }
         // 현재 리스트 임시 저장(필터링 시 재사용 위함)
         originalList = adapter.getItems();
@@ -322,7 +309,7 @@ public class cu extends AppCompatActivity {
 //
 //                // 아이템 추가
 //                while(currentSize - 1 < nextLimit){
-//                    adapter.addItem(new singleItem(nameList[currentSize], priceList[currentSize], urlList[currentSize]));
+//                    adapter.addItem(new SingleItem(nameList[currentSize], priceList[currentSize], urlList[currentSize]));
 //                    currentSize++;
 //                }
 //

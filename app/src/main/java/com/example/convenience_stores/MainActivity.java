@@ -6,25 +6,12 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
 
-import net.daum.mf.map.api.MapView;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -52,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         cu_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Goods.class);
+                Intent intent = new Intent(getApplicationContext(), GoodsActivity.class);
                 intent.putExtra("place","CU");
                 startActivity(intent);
             }
@@ -61,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         seven_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Goods.class);
+                Intent intent = new Intent(getApplicationContext(), GoodsActivity.class);
                 intent.putExtra("place","7ELEVEn");
                 startActivity(intent);
             }
@@ -70,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         gs_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Goods.class);
+                Intent intent = new Intent(getApplicationContext(), GoodsActivity.class);
                 intent.putExtra("place","GS25");
                 startActivity(intent);
             }

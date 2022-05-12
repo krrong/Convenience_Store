@@ -6,12 +6,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class singleItemView extends LinearLayout {
+public class SingleItemView extends LinearLayout {
     TextView name;
     TextView price;
     ImageView imageView;
 
-    public singleItemView(Context context){
+    public SingleItemView(Context context){
         super(context);
         init(context);
     }

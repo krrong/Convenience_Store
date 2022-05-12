@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="11"
-    tools:context=".Goods">
+    tools:context=".GoodsActivity">
     <Button
         android:id="@+id/searchGoods"
         android:layout_width="match_parent"

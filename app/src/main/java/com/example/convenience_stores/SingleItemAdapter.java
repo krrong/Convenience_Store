@@ -16,13 +16,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class singleItemAdapter extends BaseAdapter {
+public class SingleItemAdapter extends BaseAdapter {
     private Context context;
     Bitmap bitmap;
-    private ArrayList<singleItem> array_singleItem = new ArrayList<>();
+    private ArrayList<SingleItem> array_singleItem = new ArrayList<>();
 
     // 생성자
-    public singleItemAdapter(ArrayList<singleItem> array_singleItem, Context context){
+    public SingleItemAdapter(ArrayList<SingleItem> array_singleItem, Context context){
         this.context = context;
         this.array_singleItem = array_singleItem;
     }

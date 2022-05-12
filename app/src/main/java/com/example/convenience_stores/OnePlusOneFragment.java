@@ -1,9 +1,7 @@
 package com.example.convenience_stores;
 
-import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,12 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
-public class onePlusOneFragment extends GoodBaseFragment {
+public class OnePlusOneFragment extends GoodsBaseFragment {
     private RecyclerView recyclerView;
-    private ItemAdapter adapter = new ItemAdapter(new ArrayList<singleItem>());
+    private ItemAdapter adapter = new ItemAdapter(new ArrayList<SingleItem>());
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,7 +30,7 @@ public class onePlusOneFragment extends GoodBaseFragment {
     }
 
     @Override
-    public void setData(ArrayList<singleItem> goodList) {
+    public void setData(ArrayList<SingleItem> goodList) {
         // 리사이클러뷰의 어댑터를 받아와서 데이터 수정
         adapter = (ItemAdapter)recyclerView.getAdapter();
         adapter.setItems(goodList);

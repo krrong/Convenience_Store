@@ -1,9 +1,5 @@
 package com.example.convenience_stores;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,19 +14,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
-    private ArrayList<singleItem> items;    // 어댑터에 들어갈 list
+    private ArrayList<SingleItem> items;    // 어댑터에 들어갈 list
 
     // ViewHolder
     // 여기서 subView를 setting해줘야 함
@@ -48,7 +39,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         // bind 해주는 함수
-        void onBind(singleItem item){
+        void onBind(SingleItem item){
             name.setText(item.getName());
             price.setText(item.getPrice());
 
@@ -77,12 +68,12 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // 생성자
-    ItemAdapter(ArrayList<singleItem> list) {
+    ItemAdapter(ArrayList<SingleItem> list) {
         this.items = list;
     }
 
     // 인자로 받은 리스트로 수정
-    public void setItems(ArrayList<singleItem> items) {
+    public void setItems(ArrayList<SingleItem> items) {
         this.items = items;
         notifyDataSetChanged();
     }
@@ -90,7 +81,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if(viewType == VIEW_TYPE_ITEM){
-            // LayoutInflater를 이용하여 test.xml inflate
+            // LayoutInflater를 이용하여 TestActivity.xml inflate
             // ViewHolder 반환
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false);
             return new ItemViewHolder(view);
@@ -125,17 +116,17 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // 어댑터의 아이템 리스트에 추가 
-    public void addItem(singleItem item) {
+    public void addItem(SingleItem item) {
         items.add(item);
     }
 
     // 어댑터의 아이템 리스트 반환 
-    public ArrayList<singleItem> getItems() {
+    public ArrayList<SingleItem> getItems() {
         return items;
     }
 
     // 검색 기능을 위해 어댑터의 리스트 변경
-    public void filterList(ArrayList<singleItem> list){
+    public void filterList(ArrayList<SingleItem> list){
         items = list;
         notifyDataSetChanged();
     }

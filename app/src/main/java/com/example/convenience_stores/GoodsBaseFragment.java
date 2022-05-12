@@ -5,14 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class GoodBaseFragment extends Fragment {
+public class GoodsBaseFragment extends Fragment {
     private RecyclerView baseRecyclerView;
     private ItemAdapter adapter;
 
@@ -30,7 +29,7 @@ public class GoodBaseFragment extends Fragment {
         return viewGroup;
     }
 
-    public void setData(ArrayList<singleItem> goodList) {
+    public void setData(ArrayList<SingleItem> goodList) {
         // 리사이클러뷰의 어댑터를 받아와서 데이터 수정
         adapter = (ItemAdapter)baseRecyclerView.getAdapter();
         adapter.setItems(goodList);
