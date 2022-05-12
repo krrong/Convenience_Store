@@ -17,7 +17,7 @@ import com.example.convenience_stores.fragment.GoodsBaseFragment;
 import com.example.convenience_stores.fragment.OnePlusOneFragment;
 import com.example.convenience_stores.R;
 import com.example.convenience_stores.SearchMapActivity;
-import com.example.convenience_stores.SingleItem;
+import com.example.convenience_stores.data.SingleItem;
 import com.example.convenience_stores.fragment.TwoPlusOneFragment;
 import com.example.convenience_stores.mData;
 import com.google.android.material.tabs.TabLayout;

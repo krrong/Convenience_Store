@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.data;
 
 public class SingleItem {
     String name;    // 상품이름

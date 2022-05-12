@@ -10,6 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.convenience_stores.data.SingleItem;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

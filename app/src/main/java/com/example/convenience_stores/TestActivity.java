@@ -11,6 +11,7 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.example.convenience_stores.adapter.ItemAdapter;
+import com.example.convenience_stores.data.SingleItem;
 
 import java.util.ArrayList;
 

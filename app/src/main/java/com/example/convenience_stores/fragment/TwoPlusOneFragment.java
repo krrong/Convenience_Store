@@ -10,9 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.convenience_stores.R;
-import com.example.convenience_stores.SingleItem;
+import com.example.convenience_stores.data.SingleItem;
 import com.example.convenience_stores.adapter.ItemAdapter;
-import com.example.convenience_stores.fragment.GoodsBaseFragment;
 
 import java.util.ArrayList;
 

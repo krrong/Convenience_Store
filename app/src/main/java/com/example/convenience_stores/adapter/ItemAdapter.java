@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.convenience_stores.R;
-import com.example.convenience_stores.SingleItem;
+import com.example.convenience_stores.data.SingleItem;
 
 import java.net.MalformedURLException;
 import java.net.URL;
