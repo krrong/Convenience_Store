@@ -88,6 +88,7 @@ public class GoodsActivity extends FragmentActivity {
 
         // 뷰페이저에 어댑터 연결
         viewPager2.setAdapter(fragmentAdapter);
+        viewPager2.setOffscreenPageLimit(2);
         
         // 현재 보고 있는 Fragment를 얻기 위한 콜백 생성
         viewPager2.registerOnPageChangeCallback(viewPagerCallback);
@@ -141,109 +142,20 @@ public class GoodsActivity extends FragmentActivity {
             super.onPageSelected(position);
 
             // 1+1 Fragment : 1+1파일 파싱해서 보내주기
-            if (position == 0){
-                dataParsing(position, place, "1+1");
-            }
             // 2+1 Fragment : 2+1파일 파싱해서 보내주기
-            else if(position == 1){
-                dataParsing(position, place, "2+1");
-            }
-            Log.e("onPageSelected : ", Integer.toString(position));
+            dataTransfer(position, place, position == 0 ? "1+1" : "2+1");
         }
     };
 
-    // place, event에 맞는 데이터를 파싱하여 position에 위치한 Fragment에 전달
-    private void dataParsing(int position, String place, String event){
-        InputStream inName;
-        InputStream inPrice;
-        InputStream inUrl;
-
-        // 편의점과 행사에 맞는 파일 가져오기
-            if (place.equals("CU")){
-                if(event.equals("1+1")){
-                    inName = getResources().openRawResource(R.raw.cu_11_name);
-                    inPrice = getResources().openRawResource(R.raw.cu_11_price);
-                    inUrl  = getResources().openRawResource(R.raw.cu_11_link);
-                }
-                else{
-                    inName = getResources().openRawResource(R.raw.cu_21_name);
-                    inPrice = getResources().openRawResource(R.raw.cu_21_price);
-                    inUrl  = getResources().openRawResource(R.raw.cu_21_link);
-                }
-            }
-            else if(place.equals("7ELEVEn")){
-                if(event.equals("1+1")) {
-                    inName = getResources().openRawResource(R.raw.seven_11_name);
-                    inPrice = getResources().openRawResource(R.raw.seven_11_price);
-                    inUrl  = getResources().openRawResource(R.raw.seven_11_link);
-                }
-                else{
-                    inName = getResources().openRawResource(R.raw.seven_21_name);
-                    inPrice = getResources().openRawResource(R.raw.seven_21_price);
-                    inUrl  = getResources().openRawResource(R.raw.seven_21_link);
-                }
-            }
-            else{
-                if(event.equals("1+1")) {
-                    inName = getResources().openRawResource(R.raw.gs_11_name);
-                    inPrice = getResources().openRawResource(R.raw.gs_11_price);
-                    inUrl  = getResources().openRawResource(R.raw.gs_11_link);
-                }
-                else{
-                    inName = getResources().openRawResource(R.raw.gs_21_name);
-                    inPrice = getResources().openRawResource(R.raw.gs_21_price);
-                    inUrl  = getResources().openRawResource(R.raw.gs_21_link);
-                }
-            }
-
-        // 파일에서 데이터 읽어오기
-        try {
-            byte[] bName = new byte[inName.available()]; // available = 읽을 수 있는 바이트 수 반환
-            byte[] bPrice = new byte[inPrice.available()];
-            byte[] bUrl = new byte[inUrl.available()];
-
-            // 인자만큼 읽어오기
-            inName.read(bName);
-            inPrice.read(bPrice);
-            inUrl.read(bUrl);
-
-            // byte -> string 변환
-            String sName = new String(bName);
-            String sPrice = new String(bPrice);
-            String sUrl = new String(bUrl);
-
-            // "\n" 단위로 나누어 상품명, 가격, 이미지 url 배열에 저장
-            mData.setNameList(sName.split("\n"));
-            mData.setPriceList(sPrice.split("\n"));
-            mData.setUrlList(sUrl.split("\n"));
-
-            // mData 로부터 필요한 데이터 가져옴
-            String[] nameList = mData.getNameList();
-            String[] priceList = mData.getPriceList();
-            String[] urlList = mData.getUrlList();
-
-            // fragment에 넘겨줄 데이터를 items에 담음
-            ArrayList<SingleItem> items = new ArrayList<>();
-            for(int i = 0; i < nameList.length; i++){
-                items.add(new SingleItem(nameList[i], priceList[i], urlList[i]));
-            }
-
-//            nameList = sName.split("\n");
-//            priceList = sPrice.split("\n");
-//            urlList = sUrl.split("\n");
-
-//            // fragment에 넘겨줄 데이터를 items에 담음
-//            ArrayList<SingleItem> items = new ArrayList<>();
-//            for(int i=0; i<nameList.length; i++){
-//                items.add(new SingleItem(nameList[i], priceList[i], urlList[i]));
-//            }
-
-            // 각 fragment에 알맞는 값 넘겨주기
-            FragmentAdapter adapter = (FragmentAdapter) viewPager2.getAdapter();
-            GoodsBaseFragment fragment = (GoodsBaseFragment) adapter.getItem(position);
-            fragment.setData(items);
-        }catch (Exception e){
-            e.printStackTrace();
+    /**
+     * place, event에 맞는 데이터를 파싱하여 position에 위치한 Fragment에 전달
+     */
+    private void dataTransfer(int position, String place, String event){
+        if(viewPager2 == null || viewPager2.getAdapter() == null){
+            return;
         }
+
+        FragmentAdapter fragmentAdapter = (FragmentAdapter) viewPager2.getAdapter();
+        ((GoodsBaseFragment) fragmentAdapter.getItem(position)).dataParsing(place, event);
     }
 }

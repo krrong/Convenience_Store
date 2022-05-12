@@ -35,8 +35,11 @@ public class OnePlusOneFragment extends GoodsBaseFragment {
 
     @Override
     public void setData(ArrayList<SingleItem> goodList) {
-        // 리사이클러뷰의 어댑터를 받아와서 데이터 수정
-        adapter = (ItemAdapter)recyclerView.getAdapter();
-        adapter.setItems(goodList);
+        ItemAdapter adapter = new ItemAdapter(goodList);
+        recyclerView.setAdapter(adapter);
+    }
+    @Override
+    public void dataParsing(String place, String event) {
+        super.dataParsing(place, event);
     }
 }
