@@ -10,6 +10,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
+import com.example.convenience_stores.adapter.ItemAdapter;
+
 import java.util.ArrayList;
 
 public class TestActivity extends AppCompatActivity {

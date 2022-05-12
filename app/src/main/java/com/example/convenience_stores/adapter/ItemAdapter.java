@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 //import com.bumptech.glide.Glide;
 
 import com.bumptech.glide.Glide;
+import com.example.convenience_stores.R;
+import com.example.convenience_stores.SingleItem;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -68,7 +70,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // 생성자
-    ItemAdapter(ArrayList<SingleItem> list) {
+    public ItemAdapter(ArrayList<SingleItem> list) {
         this.items = list;
     }
 

@@ -14,14 +14,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Convenience_stores"
         android:usesCleartextTraffic="true">
-        <activity android:name=".GoodsActivity"></activity>
-        <activity android:name=".SearchGoodsActivity"></activity>
+        <activity android:name=".activity.GoodsActivity"></activity>
+        <activity android:name=".activity.SearchGoodsActivity"></activity>
         <activity android:name=".SearchMapActivity" />
         <activity android:name=".SelectEventActivity" />
         <activity android:name=".TestActivity" />
         <activity android:name=".cu" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

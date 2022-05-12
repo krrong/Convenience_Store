@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,6 +11,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.example.convenience_stores.R;
+import com.example.convenience_stores.activity.GoodsActivity;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

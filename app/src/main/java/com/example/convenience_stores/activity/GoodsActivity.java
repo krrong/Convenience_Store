@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.activity;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -12,6 +12,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.convenience_stores.adapter.FragmentAdapter;
+import com.example.convenience_stores.fragment.GoodsBaseFragment;
+import com.example.convenience_stores.fragment.OnePlusOneFragment;
+import com.example.convenience_stores.R;
+import com.example.convenience_stores.SearchMapActivity;
+import com.example.convenience_stores.SingleItem;
+import com.example.convenience_stores.fragment.TwoPlusOneFragment;
+import com.example.convenience_stores.mData;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -24,7 +32,7 @@ public class GoodsActivity extends FragmentActivity {
     private Button searchConvenience;                           // 편의점 검색 버튼
     private Button searchGoods;                                 // 상품 검색 버튼
     private String place;                                       // 선택한 편의점(get from Intent)
-    mData mData = new mData();                                  // 데이터 객체
+    com.example.convenience_stores.mData mData = new mData();                                  // 데이터 객체
 
 //    String[] nameList;
 //    String[] priceList;

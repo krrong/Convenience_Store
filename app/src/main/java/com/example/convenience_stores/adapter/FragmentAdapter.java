@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;

@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.fragment;
 
 import android.os.Bundle;
 
@@ -8,6 +8,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.convenience_stores.R;
+import com.example.convenience_stores.SingleItem;
+import com.example.convenience_stores.adapter.ItemAdapter;
+import com.example.convenience_stores.fragment.GoodsBaseFragment;
 
 import java.util.ArrayList;
 

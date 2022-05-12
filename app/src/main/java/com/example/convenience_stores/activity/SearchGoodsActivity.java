@@ -1,4 +1,4 @@
-package com.example.convenience_stores;
+package com.example.convenience_stores.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,6 +10,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
+import com.example.convenience_stores.adapter.ItemAdapter;
+import com.example.convenience_stores.R;
+import com.example.convenience_stores.SingleItem;
+
 import java.util.ArrayList;
 
 public class SearchGoodsActivity extends AppCompatActivity {
@@ -20,7 +24,7 @@ public class SearchGoodsActivity extends AppCompatActivity {
     private EditText searchGoodEditText;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<SingleItem>());
 
-    mData mData;
+    com.example.convenience_stores.mData mData;
 //    String[] nameList;
 //    String[] priceList;
 //    String[] urlList;

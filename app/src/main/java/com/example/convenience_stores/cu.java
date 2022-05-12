@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.convenience_stores.adapter.ItemAdapter;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 
