@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.EditText;
 
 import com.example.convenience_stores.adapter.ItemAdapter;
@@ -17,18 +18,14 @@ import com.example.convenience_stores.data.SingleItem;
 import java.util.ArrayList;
 
 public class SearchGoodsActivity extends AppCompatActivity {
-    private ArrayList<SingleItem> originalList = new ArrayList<>();     // 원래 어댑터가 가지고 있던 리스트 저장 용도
+    private ArrayList<SingleItem> originalList = new ArrayList<>();     // GoodActivity 에서 받아온 아이템 리스트 저장(전체 리스트)
     private ArrayList<SingleItem> searchList = new ArrayList<>();       // 빈 리스트, 검색 데이터 저장 용도
+    String place;           // 선택한 편의점 이름
 
     private RecyclerView searchGoodRecyclerView;
     private EditText searchGoodEditText;
     private ItemAdapter adapter = new ItemAdapter(new ArrayList<SingleItem>());
 
-    com.example.convenience_stores.mData mData;
-//    String[] nameList;
-//    String[] priceList;
-//    String[] urlList;
-    String place;           // 선택한 편의점 이름
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,32 +40,14 @@ public class SearchGoodsActivity extends AppCompatActivity {
     // intent로부터 데이터를 얻어옴
     private void getData(){
         Intent intent = getIntent();
-        place = intent.getStringExtra("place");
-        mData = intent.getParcelableExtra("mData");
 
-//        nameList = intent.getStringArrayExtra("nameList");
-//        priceList = intent.getStringArrayExtra("priceList");
-//        urlList = intent.getStringArrayExtra("urlList");
+        place = intent.getStringExtra("place");
+        originalList = intent.getParcelableArrayListExtra("items");
     }
 
     void initView(){
         searchGoodRecyclerView = findViewById(R.id.searchGoodRecyclerView);
         searchGoodEditText = findViewById(R.id.searchGoodEditText);
-        
-        // mData 객체에서 리스트 가져오기 
-        String[] nameList = mData.getNameList();
-        String[] priceList = mData.getPriceList();
-        String[] urlList = mData.getUrlList();
-        
-        // adapter 에 아이템 추가
-        for (int i = 0; i < nameList.length; i++) {
-            adapter.addItem(new SingleItem(nameList[i], priceList[i], urlList[i]));
-        }
-        // originalList 는 모든 상품이 들어가 있는 상태로 세팅
-        originalList = adapter.getItems();
-
-        // adapter 를 데이터가 없는 searchList 로 세팅(초기에 아무것도 보여주지 않기 위함)
-        adapter.filterList(searchList);
 
         // recyclerView <-> adapter 연결
         searchGoodRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -99,7 +78,7 @@ public class SearchGoodsActivity extends AppCompatActivity {
                 // "" 이면 검색어를 지운 것이므로 아무것도 보이지 않도록 동작(searchList 를 clear() 해서 사용)
                 if (searchText.equals("")) {
                     searchList.clear();
-                    adapter.filterList(searchList);
+                    adapter.setItems(searchList);
                 }
                 // searchText 를 포함하는 아이템들만 보이도록 동작(searchList 사용)
                 else {
@@ -109,7 +88,7 @@ public class SearchGoodsActivity extends AppCompatActivity {
                             searchList.add(originalList.get(i));
                         }
                     }
-                    adapter.filterList(searchList);
+                    adapter.setItems(searchList);
                 }
             }
         });
