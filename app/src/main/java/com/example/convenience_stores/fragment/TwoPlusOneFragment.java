@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 public class TwoPlusOneFragment extends GoodsBaseFragment {
     private RecyclerView recyclerView;
+    private ItemAdapter adapter = new ItemAdapter(new ArrayList<SingleItem>());
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,12 +34,17 @@ public class TwoPlusOneFragment extends GoodsBaseFragment {
 
     @Override
     public void setData(ArrayList<SingleItem> goodList) {
-        ItemAdapter adapter = new ItemAdapter(goodList);
+        adapter.setItems(goodList);
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void dataParsing(String place, String event) {
         super.dataParsing(place, event);
+    }
+
+    @Override
+    public ItemAdapter getAdapter() {
+        return adapter;
     }
 }

@@ -28,18 +28,22 @@ public class OnePlusOneFragment extends GoodsBaseFragment {
         // 리사이클러뷰 바인딩, 어댑터와 연결
         recyclerView = (RecyclerView) viewGroup.findViewById(R.id.onePlusOneRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(adapter);
 
         return viewGroup;
     }
 
     @Override
     public void setData(ArrayList<SingleItem> goodList) {
-        ItemAdapter adapter = new ItemAdapter(goodList);
+        adapter.setItems(goodList);
         recyclerView.setAdapter(adapter);
     }
     @Override
     public void dataParsing(String place, String event) {
         super.dataParsing(place, event);
+    }
+
+    @Override
+    public ItemAdapter getAdapter() {
+        return adapter;
     }
 }
