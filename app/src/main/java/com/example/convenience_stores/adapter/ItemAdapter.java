@@ -74,7 +74,9 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.items = list;
     }
 
-    // 인자로 받은 리스트로 수정
+    /**
+     * 인자로 받은 리스트로 어댑터 데이터 세팅 및 갱신
+     */
     public void setItems(ArrayList<SingleItem> items) {
         this.items = items;
         notifyDataSetChanged();
@@ -117,26 +119,23 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return items.size();
     }
 
-    // 어댑터의 아이템 리스트에 추가 
+    /**
+     * 어댑터의 아이템 리스트에 추가
+     * @param item
+     */
     public void addItem(SingleItem item) {
         items.add(item);
     }
 
-    // 어댑터의 아이템 리스트 반환 
+    /**
+     * 어댑터의 아이템 리스트 반환
+     * @return items
+     */
     public ArrayList<SingleItem> getItems() {
         return items;
-    }
-
-    // 검색 기능을 위해 어댑터의 리스트 변경
-    public void filterList(ArrayList<SingleItem> list){
-        items = list;
-        notifyDataSetChanged();
     }
 
     private void showLoadingView(LoadingViewHolder holder, int position) {
 
     }
 }
-
-
-
