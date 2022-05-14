@@ -61,7 +61,7 @@ public class TestActivity extends AppCompatActivity {
         originalList = adapter.getItems();
 
         // adapter 를 데이터가 없는 searchList 로 세팅(초기에 아무것도 보여주지 않기 위함)
-        adapter.filterList(searchList);
+        adapter.setItems(searchList);
 
         // recyclerView <-> adapter 연결
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -92,7 +92,7 @@ public class TestActivity extends AppCompatActivity {
                 // "" 이면 검색어를 지운 것이므로 아무것도 보이지 않도록 동작(searchList 를 clear() 해서 사용)
                 if (searchText.equals("")) {
                     searchList.clear();
-                    adapter.filterList(searchList);
+                    adapter.setItems(searchList);
                 }
                 // searchText 를 포함하는 아이템들만 보이도록 동작(searchList 사용)
                 else {
@@ -102,7 +102,7 @@ public class TestActivity extends AppCompatActivity {
                             searchList.add(originalList.get(i));
                         }
                     }
-                    adapter.filterList(searchList);
+                    adapter.setItems(searchList);
                 }
             }
         });
