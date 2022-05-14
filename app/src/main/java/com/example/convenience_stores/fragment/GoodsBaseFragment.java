@@ -47,6 +47,18 @@ public class GoodsBaseFragment extends Fragment {
     }
 
     /**
+     * recyclerView 에 붙은 adapter 리턴 
+     */
+    public ItemAdapter getAdapter() {
+        // 리사이클러뷰가 없거나 연결된 어댑터가 없으면 종료
+        if (recyclerView == null || recyclerView.getAdapter() == null)
+            return null;
+
+        // 리사이클러뷰의 어댑터 리턴
+        return (ItemAdapter) recyclerView.getAdapter();
+    }
+
+    /**
      * 편의점, 이벤트에 따른 파일 데이터 불러와 파싱
      */
     public void dataParsing(String place, String event) {
