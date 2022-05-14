@@ -1,6 +1,9 @@
 package com.example.convenience_stores.data;
 
-public class SingleItem {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class SingleItem implements Parcelable {
     String name;    // 상품이름
     String price;   // 상품가격
     String url;     // 상품이미지 저장링크
@@ -28,4 +31,34 @@ public class SingleItem {
         return this.price;
     }
     public String getUrl(){ return this.url; }
+
+    protected SingleItem(Parcel parcel){
+        name = parcel.readString();
+        price = parcel.readString();
+        url = parcel.readString();
+    }
+
+    public static final Creator<SingleItem> CREATOR = new Creator<SingleItem>() {
+        @Override
+        public SingleItem createFromParcel(Parcel parcel) {
+            return new SingleItem(parcel);
+        }
+
+        @Override
+        public SingleItem[] newArray(int size) {
+            return new SingleItem[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(name);
+        parcel.writeString(price);
+        parcel.writeString(url);
+    }
 }
