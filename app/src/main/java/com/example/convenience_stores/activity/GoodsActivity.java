@@ -13,11 +13,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.convenience_stores.adapter.FragmentAdapter;
+import com.example.convenience_stores.adapter.ItemAdapter;
+import com.example.convenience_stores.data.SingleItem;
 import com.example.convenience_stores.fragment.GoodsBaseFragment;
 import com.example.convenience_stores.fragment.OnePlusOneFragment;
 import com.example.convenience_stores.R;
 import com.example.convenience_stores.SearchMapActivity;
-import com.example.convenience_stores.data.SingleItem;
 import com.example.convenience_stores.fragment.TwoPlusOneFragment;
 import com.example.convenience_stores.mData;
 import com.google.android.material.tabs.TabLayout;
@@ -25,14 +26,13 @@ import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class GoodsActivity extends FragmentActivity {
-    private Button searchConvenience;                           // 편의점 검색 버튼
-    private Button searchGoods;                                 // 상품 검색 버튼
-    private String place;                                       // 선택한 편의점(get from Intent)
-    com.example.convenience_stores.mData mData = new mData();                                  // 데이터 객체
+    private Button searchConvenienceBtn;                            // 편의점 검색 버튼
+    private Button searchGoodsBtn;                                  // 상품 검색 버튼
+    private String place;                                           // 선택한 편의점(get from Intent)
+    int pos;                                                        // 뷰페이저가 보고 있는 페이지 position 저장
 
 //    String[] nameList;
 //    String[] priceList;
@@ -62,8 +62,8 @@ public class GoodsActivity extends FragmentActivity {
         // binding
         viewPager2 = (ViewPager2) findViewById(R.id.viewPager);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        searchConvenience = (Button) findViewById(R.id.searchConvenience);
-        searchGoods = (Button) findViewById(R.id.searchGoods);
+        searchConvenienceBtn = (Button) findViewById(R.id.searchConvenienceBtn);
+        searchGoodsBtn = (Button) findViewById(R.id.searchGoodsBtn);
 
         ArrayList<Fragment> fragments = new ArrayList();
 
@@ -74,10 +74,7 @@ public class GoodsActivity extends FragmentActivity {
         FragmentAdapter fragmentAdapter = new FragmentAdapter(this, fragments);
 
         // 주변 편의점 검색 버튼 텍스트
-        searchConvenience.setText("주변 " + place + "검색하기");
-
-//        // 번들 객체 생성
-//        bundle.putString("place", place);
+        searchConvenienceBtn.setText("주변 " + place + "검색하기");
 
         // 탭 타이틀 추가
         tabTitles.add("1+1");
@@ -107,7 +104,7 @@ public class GoodsActivity extends FragmentActivity {
     // 리스너 함수 bind
     private void setListener(){
         // 편의점 검색 버튼 클릭 함수
-        searchConvenience.setOnClickListener(new View.OnClickListener() {
+        searchConvenienceBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), SearchMapActivity.class);
@@ -116,21 +113,35 @@ public class GoodsActivity extends FragmentActivity {
             }
         });
         // 상품 검색 버튼 클릭 함수
-        searchGoods.setOnClickListener(new View.OnClickListener() {
+        searchGoodsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (pos > 1){
+                    Log.e("MSG", "searchGoodsBtn.setOnClickListener 에러");
+                    return;
+                }
+
+                // 현재 보고 있는 프래그먼트의 어댑터 -> 어댑터의 아이템을 items 에 저장.
+                FragmentAdapter fragmentAdapter = (FragmentAdapter)viewPager2.getAdapter();
+                ItemAdapter itemAdapter = ((GoodsBaseFragment) fragmentAdapter.getItem(pos)).getAdapter();
+                ArrayList<SingleItem> items =  itemAdapter.getItems();
+
+                // 위치와 아이템을 intent 를 통해 SearchGoodsActivity 로 전달
                 Intent intent = new Intent(getApplicationContext(), SearchGoodsActivity.class);
                 intent.putExtra("place", place);
-                intent.putExtra("mData", mData);
-//                intent.putExtra("nameList", nameList);
-//                intent.putExtra("priceList", priceList);
-//                intent.putExtra("urlList", urlList);
+                // 객체 리스트 보낼 때
+                intent.putParcelableArrayListExtra("items", items);
+                
+                // 객체만 보낼 때
+                // intent.putExtra("items", item);
                 startActivity(intent);
             }
         });
     }
 
-    // 2+1 Fragment에 데이터를 넘겨주기 위해 콜백으로 작성(Fragment 전환 시 실행)
+    /**
+     * 각 Fragment에 데이터를 넘겨주기 위한 콜백 (Fragment 전환 시 실행)
+     */
     private ViewPager2.OnPageChangeCallback viewPagerCallback = new ViewPager2.OnPageChangeCallback() {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -140,6 +151,8 @@ public class GoodsActivity extends FragmentActivity {
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
+            // 현재 보고 있는 페이지의 position 저장
+            pos = position;
 
             // 1+1 Fragment : 1+1파일 파싱해서 보내주기
             // 2+1 Fragment : 2+1파일 파싱해서 보내주기
