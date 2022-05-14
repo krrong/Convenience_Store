@@ -232,7 +232,7 @@ public class cu extends AppCompatActivity {
                 // == 대신 equals사용 해야함
                 // "" 이면 검색어를 지운 것이므로 기존 아이템들이 보이도록 동작(originalList 사용)
                 if(searchText.equals("")){
-                    adapter.filterList(originalList);
+                    adapter.setItems(originalList);
                 }
                 // searchText 를 포함하는 아이템들만 보이도록 동작(searchList 사용)
                 else{
@@ -242,7 +242,7 @@ public class cu extends AppCompatActivity {
                             searchList.add(originalList.get(i));
                         }
                     }
-                    adapter.filterList(searchList);
+                    adapter.setItems(searchList);
                 }
             }
         });
