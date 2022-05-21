@@ -1,6 +1,10 @@
 package com.example.convenience_stores;
 
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,9 +38,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchMapActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
 
-    private static final String LOG_TAG = "SearchMapActivity";
+    private String LOG_TAG = "SearchMapActivity";
 
-    // New code
     private MapView mapView;
     private ViewGroup mapViewContainer;
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
@@ -47,14 +50,19 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     private Button searchBtn;           // 편의점 검색 버튼
     private int radius = 500;           // 검색 반경 거리
 
+    private double currentLatitude = 0;
+    private double currentLongitude = 0;
+
     // 앱을 실행하기 위해 필요한 퍼미션 정의
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
     
     // 편의점 이름
-    private String name;    // 편의점 이름
+    private String name;
 
     // Snackbar를 사용하기 위해서는 view 필요
     private View mLayout;
+
+    private ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +84,11 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
             // 현 위치 잡기
             mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
         }
+
     }
 
+    // 바인딩
     private void initView(){
-        // 바인딩
-
         // 지도 띄우기
         mapView = new MapView(this);
         mapViewContainer = (ViewGroup)findViewById(R.id.map);
@@ -98,6 +106,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         searchBtn.setText("주변 " + name + "검색하기");
     }
 
+    // 버튼 리스너 작성
     private void setBtnListener(){
         makeCircleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,12 +131,12 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                 // 반환 : 위경도 좌표시스템(WGS84)의 좌표값
                 MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
 
-                // 위, 경도
-                double latitude = geoCoordinate.latitude;
-                double longitude = geoCoordinate.longitude;
+//                // 현재 지도 화면 중심점의 위, 경도
+//                double latitude = geoCoordinate.latitude;
+//                double longitude = geoCoordinate.longitude;
 
-                Log.e(LOG_TAG, "위도 : " + Double.toString(latitude));
-                Log.e(LOG_TAG, "경도 : " + Double.toString(longitude));
+                Log.e(LOG_TAG, "위도 : " + Double.toString(currentLatitude));
+                Log.e(LOG_TAG, "경도 : " + Double.toString(currentLongitude));
 
                 // Retrofit 생성
                 Retrofit retrofit = new Retrofit.Builder()
@@ -142,8 +151,8 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                         api.getSearchKeyword(
                                 API_KEY,
                                 name,
-                                Double.toString(longitude),
-                                Double.toString(latitude),
+                                Double.toString(currentLongitude),
+                                Double.toString(currentLatitude),
                                 radius);
 
                 // API 서버에 요청
@@ -188,6 +197,8 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
+        currentLatitude = mapPointGeo.latitude;
+        currentLongitude = mapPointGeo.longitude;
         Log.e(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
     }
 
