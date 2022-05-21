@@ -44,9 +44,8 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     private ViewGroup mapViewContainer;
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    private String BASE_URL = "https://dapi.kakao.com/";
-    private String API_KEY = "KakaoAK a2d69db3c795c70fb4bcb73b7794abfb";
-    private Button makeCircleBtn;       // 원 생성 버튼
+    private String BASE_URL = "https://dapi.kakao.com/";                    // 카카오 URL
+    private String API_KEY = "KakaoAK a2d69db3c795c70fb4bcb73b7794abfb";    // 카카오 API 인증키
     private Button searchBtn;           // 편의점 검색 버튼
     private int radius = 500;           // 검색 반경 거리
 
@@ -57,7 +56,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
     
     // 편의점 이름
-    private String name;
+    private String place;
 
     // Snackbar를 사용하기 위해서는 view 필요
     private View mLayout;
@@ -98,62 +97,73 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         mapView.setCurrentLocationEventListener(this);
 
         // Intent 로부터 편의점 이름 받아오기
-        name = getIntent().getStringExtra("place");
+        place = getIntent().getStringExtra("place");
 
         // 버튼 바인딩
         searchBtn = findViewById(R.id.searchBtn);
-        makeCircleBtn = findViewById(R.id.makeCircleBtn);
-        searchBtn.setText("주변 " + name + "검색하기");
+
+        // 현재 위치 검색 될 때까지 버튼을 사용하지 못하게 함
+        searchBtn.setEnabled(false);
     }
 
     // 버튼 리스너 작성
     private void setBtnListener(){
-        makeCircleBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MapPoint mapPoint = mapView.getMapCenterPoint();
-                MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
-
-                // 중심점으로부터 반지름이 radius인 추가
-                MapCircle mapCircle = new MapCircle(mapPoint, radius, 1, R.color.teal_200);
-                mapView.addCircle(mapCircle);
-            }
-        });
-
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 현재 지도 화면의 중심점을 조회한다.
-                // 반환 : 현재 지도 화면의 중심점 --> 지도를 옮기면 변한다
-                MapPoint mapPoint = mapView.getMapCenterPoint();
-
-                // MapPoint 객체가 나타내는 지점의 좌표값을 위경도 좌표시스템(WGS84)의 좌표값으로 조회한다.
-                // 반환 : 위경도 좌표시스템(WGS84)의 좌표값
-                MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
+//                // 현재 지도 화면의 중심점을 조회한다.
+//                // 반환 : 현재 지도 화면의 중심점 --> 지도를 옮기면 변한다
+//                MapPoint mapPoint = mapView.getMapCenterPoint();
+//
+//                // MapPoint 객체가 나타내는 지점의 좌표값을 위경도 좌표시스템(WGS84)의 좌표값으로 조회한다.
+//                // 반환 : 위경도 좌표시스템(WGS84)의 좌표값
+//                MapPoint.GeoCoordinate geoCoordinate =  mapPoint.getMapPointGeoCoord();
 
 //                // 현재 지도 화면 중심점의 위, 경도
 //                double latitude = geoCoordinate.latitude;
 //                double longitude = geoCoordinate.longitude;
 
-                Log.e(LOG_TAG, "위도 : " + Double.toString(currentLatitude));
-                Log.e(LOG_TAG, "경도 : " + Double.toString(currentLongitude));
+                MapCircle[] mapCircles = mapView.getCircles();
+
+                // 현재 지도에 원이 있다면 삭제
+                if(mapCircles.length != 0){
+                    for(MapCircle circle : mapCircles){
+                        mapView.removeCircle(circle);
+                    }
+                }
+
+                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(currentLatitude, currentLongitude);
+
+                // 중심점으로부터 반지름이 radius인 추가
+                MapCircle mapCircle = new MapCircle(
+                        mapPoint,           // 원의 중심좌표
+                        radius,             // m단위 원의 반지름
+                        android.graphics.Color.argb(50, 0, 0, 0),      // 선의 색
+                        android.graphics.Color.argb(100, 255, 255, 255)       // 원의 색
+                );
+                mapView.addCircle(mapCircle);
+
+                Log.e(LOG_TAG, "현재 디바이스 위도 : " + Double.toString(currentLatitude));
+                Log.e(LOG_TAG, "현재 디바이스 경도 : " + Double.toString(currentLongitude));
 
                 // Retrofit 생성
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(BASE_URL)
+                        .baseUrl(BASE_URL)                                  // API 기본 URL
                         .addConverterFactory(GsonConverterFactory.create())
                         .build();
 
-                KakaoAPI api = retrofit.create(KakaoAPI.class);     // 통신 인터페이스 객체로 생성
+                // 통신 인터페이스 객체로 생성
+                KakaoAPI api = retrofit.create(KakaoAPI.class);
 
                 // 검색 조건 입력
                 Call<ResultSearchKeyword> call =
                         api.getSearchKeyword(
-                                API_KEY,
-                                name,
-                                Double.toString(currentLongitude),
-                                Double.toString(currentLatitude),
-                                radius);
+                                API_KEY,                            // 카카오 API 인증키
+                                place,                              // 검색을 원하는 질의어
+                                Double.toString(currentLongitude),  // longitude
+                                Double.toString(currentLatitude),   // latitude
+                                radius                              // 반경거리
+                        );
 
                 // API 서버에 요청
                 call.enqueue(new Callback<ResultSearchKeyword>() {
@@ -163,10 +173,12 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                         Log.e("TEST", "Raw : " + response.raw());
                         Log.e("TEST", "Body : " + response.body().documents);
 
-                        // 기존에 찍혀있는 마커가 있으면 삭제
+                        // 기존에 찍혀있는 마커 삭제
                         mapView.removePOIItems(mapView.getPOIItems());
 
+                        // 받아온 위치에 마커 추가
                         for(Place document : response.body().documents){
+                            // 받아온 위치 확인
                             Log.e("TEST", document.place_name);
 
                             // 마커 추가
@@ -188,18 +200,22 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                         Log.e("TEST", "통신 실패");
                     }
                 });
-
-                Toast.makeText(getApplicationContext(), "검색이 완료되었습니다.", Toast.LENGTH_LONG).show();
+                
+                Toast.makeText(getApplicationContext(), "검색이 완료되었습니다.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // 현재 위치가 리턴되면 전역으로 선언된 위, 경도 수정 및 버튼 사용 가능하도록 수정
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
         currentLatitude = mapPointGeo.latitude;
         currentLongitude = mapPointGeo.longitude;
         Log.e(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
+
+        searchBtn.setText("주변 " + place + "검색하기");
+        searchBtn.setEnabled(true);
     }
 
     // ActivityCompat.requestPermissions를 사용한 퍼미션 요청의 결과를 리턴받는 메소드
