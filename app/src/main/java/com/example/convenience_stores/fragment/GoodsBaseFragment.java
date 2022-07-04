@@ -1,6 +1,7 @@
 package com.example.convenience_stores.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.convenience_stores.R;
 import com.example.convenience_stores.data.SingleItem;
 import com.example.convenience_stores.adapter.ItemAdapter;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class GoodsBaseFragment extends Fragment {
@@ -58,136 +66,83 @@ public class GoodsBaseFragment extends Fragment {
         return (ItemAdapter) recyclerView.getAdapter();
     }
 
+
     /**
-     * 편의점, 이벤트에 따른 파일 데이터 불러와 파싱
+     * JSON으로 저장된 파일을 불러와 데이터 파싱
+     * @param place
+     * @param event
      */
     public void dataParsing(String place, String event) {
-        InputStream inName = getResources().openRawResource(getNameRawResourceId(place, event));
-        InputStream inPrice = getResources().openRawResource(getPriceRawResourceId(place, event));
-        InputStream inUrl = getResources().openRawResource(getUrlRawResourceId(place, event));
+        String fileName = getFileName(place, event);
 
-        // 파일에서 데이터 읽어오기
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject = null;
+
+        // fragment에 넘겨줄 데이터를 items에 담음
+        ArrayList<SingleItem> items = new ArrayList<>();
+
         try {
-            byte[] bName = new byte[inName.available()]; // available = 읽을 수 있는 바이트 수 반환
-            byte[] bPrice = new byte[inPrice.available()];
-            byte[] bUrl = new byte[inUrl.available()];
+            InputStream inputStream = getContext().openFileInput(fileName);
+            if(inputStream != null){
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String data = bufferedReader.readLine();
 
-            // 인자만큼 읽어오기
-            inName.read(bName);
-            inPrice.read(bPrice);
-            inUrl.read(bUrl);
+                // 파일 전체 읽기
+                while(data != null){
+                    Object obj = parser.parse(data);
+                    jsonObject = (JsonObject) obj;
 
-            // byte -> string 변환
-            String sName = new String(bName);
-            String sPrice = new String(bPrice);
-            String sUrl = new String(bUrl);
+                    JsonElement name = jsonObject.get("name");
+                    JsonElement price = jsonObject.get("price");
+                    JsonElement url = jsonObject.get("url");
 
-            // "\n" 단위로 나누어 상품명, 가격, 이미지 url 배열에 저장
-            String[] nameList = sName.split("\n");
-            String[] priceList = sPrice.split("\n");
-            String[] urlList = sUrl.split("\n");
+                    items.add(new SingleItem(name.getAsString(), price.getAsString(), url.getAsString()));
 
-            // fragment에 넘겨줄 데이터를 items에 담음
-            ArrayList<SingleItem> items = new ArrayList<>();
-            for(int i = 0; i < nameList.length; i++) {
-                items.add(new SingleItem(nameList[i], priceList[i], urlList[i]));
+                    // 다음 데이터 읽어옴
+                    data = bufferedReader.readLine();
+                }
+
+                inputStream.close();
+                inputStreamReader.close();
+                bufferedReader.close();
             }
-
-            setData(items);
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        setData(items);
     }
 
-    //  ============================================================================================
-    // TODO : JSON 파일 하나로 통합된다면 아래 함수중 1개만 남고 사라지겠지?
-    private int getNameRawResourceId(String place, String event) {
+    /**
+     * 편의점과 이벤트를 입력 받아 알맞는 JSON파일명 리턴
+     */
+    public String getFileName(String place, String event) {
         switch(place) {
             case "CU":
                 switch (event) {
                     case "1+1":
-                        return R.raw.cu_11_name;
+                        return "cu11.txt";
                     case "2+1":
-                        return R.raw.cu_21_name;
+                        return "cu21.txt";
                 }
-                break;
             case "7ELEVEn":
                 switch (event) {
                     case "1+1":
-                        return R.raw.seven_11_name;
+                        return "seven11.txt";
                     case "2+1":
-                        return R.raw.seven_21_name;
+                        return "seven21.txt";
                 }
-                break;
             case "GS25":
                 switch (event) {
                     case "1+1":
-                        return R.raw.gs_11_name;
+                        return "gs11.txt";
                     case "2+1":
-                        return R.raw.gs_21_name;
+                        return "gs21.txt";
                 }
-                break;
         }
-        return 0;
-    }
-
-    private int getPriceRawResourceId(String place, String event) {
-        switch(place) {
-            case "CU":
-                switch (event) {
-                    case "1+1":
-                        return R.raw.cu_11_price;
-                    case "2+1":
-                        return R.raw.cu_21_price;
-                }
-                break;
-            case "7ELEVEn":
-                switch (event) {
-                    case "1+1":
-                        return R.raw.seven_11_price;
-                    case "2+1":
-                        return R.raw.seven_21_price;
-                }
-                break;
-            case "GS25":
-                switch (event) {
-                    case "1+1":
-                        return R.raw.gs_11_price;
-                    case "2+1":
-                        return R.raw.gs_21_price;
-                }
-                break;
-        }
-        return 0;
-    }
-
-    private int getUrlRawResourceId(String place, String event) {
-        switch(place) {
-            case "CU":
-                switch (event) {
-                    case "1+1":
-                        return R.raw.cu_11_link;
-                    case "2+1":
-                        return R.raw.cu_21_link;
-                }
-                break;
-            case "7ELEVEn":
-                switch (event) {
-                    case "1+1":
-                        return R.raw.seven_11_link;
-                    case "2+1":
-                        return R.raw.seven_21_link;
-                }
-                break;
-            case "GS25":
-                switch (event) {
-                    case "1+1":
-                        return R.raw.gs_11_link;
-                    case "2+1":
-                        return R.raw.gs_21_link;
-                }
-                break;
-        }
-        return 0;
+        return null;
     }
 }

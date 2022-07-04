@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         initView();
         setBtnListener();
         makeJson();
+        readFile("cu11.txt");
     }
 
     private void initView(){
@@ -110,12 +111,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // JSON 파일 형식으로 변경
+    /**
+     * JSON 파일 형식으로 변경하여 내부 저장소에 저장
+     */
     private void makeJson() {
         int nameFiles[] = {R.raw.cu_11_name, R.raw.seven_11_name, R.raw.gs_11_name, R.raw.cu_21_name, R.raw.seven_21_name, R.raw.gs_21_name};
         int priceFiles[] = {R.raw.cu_11_price, R.raw.seven_11_price, R.raw.gs_11_price, R.raw.cu_21_price, R.raw.seven_21_price, R.raw.gs_21_price};
         int urlFiles[] = {R.raw.cu_11_link, R.raw.seven_11_link, R.raw.gs_11_link, R.raw.cu_21_link, R.raw.seven_21_link, R.raw.gs_21_link};
-        String names[] = {"cu11.txt", "seven11.txt", "gs11.txt", "cu12.txt", "seven12.txt", "gs12.txt"};
+        String names[] = {"cu11.txt", "seven11.txt", "gs11.txt", "cu21.txt", "seven21.txt", "gs21.txt"};
 
         for(int i=0;i<nameFiles.length; i++){
             String saveFileName = names[i];
@@ -155,17 +158,22 @@ public class MainActivity extends AppCompatActivity {
                     jsonObject.put("price", priceList[j]);
                     jsonObject.put("url", urlList[j]);
 
+                    // JSON Array 에 추가
                     jsonArray.put(jsonObject);
                 }
-                wrtieFile(saveFileName, jsonArray);
 
+                wrtieFile(saveFileName, jsonArray);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    // 내부 저장소에 파일 쓰기
+    /**
+     * // 내부 저장소에 파일 쓰기
+     * @param fileName
+     * @param msg
+     */
     void wrtieFile(String fileName, JSONArray msg){
         // Context.MODE_PRIVATE : 덮어쓰기
         // Context.MODE_APPEND : 이어쓰기
@@ -202,9 +210,10 @@ public class MainActivity extends AppCompatActivity {
                 while(data != null){
                     Object obj = parser.parse(data);
                     jsonObject = (JsonObject) obj;
-                }
 
-                Log.e("HIHI", jsonObject.toString());
+                    // 다음 데이터 읽어옴
+                    data = bufferedReader.readLine();
+                }
 
                 inputStream.close();
                 inputStreamReader.close();
