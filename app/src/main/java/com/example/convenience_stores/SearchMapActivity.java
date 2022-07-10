@@ -16,7 +16,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +44,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
 
     private MapView mapView;
     private ViewGroup mapViewContainer;
-    private static final int GPS_ENABLE_REQUEST_CODE = 2001;
-    private static final int PERMISSIONS_REQUEST_CODE = 100;
+    private static final int PERMISSIONS_REQUEST_CODE = 1004;
     private String BASE_URL = "https://dapi.kakao.com/";                    // 카카오 URL
     private String API_KEY = "KakaoAK a2d69db3c795c70fb4bcb73b7794abfb";    // 카카오 API 인증키
     private Button searchBtn;           // 편의점 검색 버튼
@@ -52,16 +53,11 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     private double currentLatitude = 0;
     private double currentLongitude = 0;
 
-    // 앱을 실행하기 위해 필요한 퍼미션 정의
+    // 앱을 실행하기 위해 필요한 퍼미션 정의 -> requestPermissions 에서 배열 형태를 인자로 받기 때문
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION};
     
     // 편의점 이름
     private String place;
-
-    // Snackbar를 사용하기 위해서는 view 필요
-    private View mLayout;
-
-    private ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,18 +68,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         initView();
         setBtnListener();
 
-        if(!checkLocationServicesStatus()){
-            // GPS 활성화
-            showDialogForLocationServiceSetting();
-        }
-        else{
-            // 런타임 퍼미션 처리
-            checkRunTimePermission();
-
-            // 현 위치 잡기
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
-        }
-
+        checkRunTimePermission();
     }
 
     // 바인딩
@@ -132,6 +117,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                     }
                 }
 
+                // 현재 위치 기준 맵 포인트 생성
                 MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(currentLatitude, currentLongitude);
 
                 // 중심점으로부터 반지름이 radius인 추가
@@ -218,131 +204,108 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         searchBtn.setEnabled(true);
     }
 
-    // ActivityCompat.requestPermissions를 사용한 퍼미션 요청의 결과를 리턴받는 메소드
+    // ActivityCompat.requestPermissions 를 사용한 퍼미션 요청의 결과를 리턴받는 메소드
     @Override
     public void onRequestPermissionsResult(int permsRequestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grandResults) {
         super.onRequestPermissionsResult(permsRequestCode, permissions, grandResults);
 
-        // 요청 코드가 PERMISSIONS_REQUEST_CODE 이고, 요청한 퍼미션 개수만큼 수신되었다면
-        if ( permsRequestCode == PERMISSIONS_REQUEST_CODE && grandResults.length == REQUIRED_PERMISSIONS.length) {
-            boolean check_result = true;
+        switch (permsRequestCode){
+            // 요청 코드가 PERMISSIONS_REQUEST_CODE 이면
+            case PERMISSIONS_REQUEST_CODE:
 
-            // 모든 퍼미션을 허용했는지 체크
-            for (int result : grandResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    check_result = false;
-                    break;
+                // 허용을 선택한 경우(permission granted)
+                if(grandResults.length > 0 && grandResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Log.e("HELL", "Permission Granted");
                 }
-            }
-            // 위치 값을 가져올 수 있음
-            if(check_result){
-                Log.d(LOG_TAG, "start");
-            }
-            // 거부한 퍼미션이 있다면 앱을 사용할 수 없는 이유를 설명해주고 앱을 종료 -> 2 가지 경우
-            else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])
-                        || ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[1])) {
 
-                    // 사용자가 거부만 선택한 경우에는 앱을 다시 실행하여 허용을 선택하면 앱을 사용할 수 있다.
-                    Snackbar.make(mLayout, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요. ",
-                            Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    }).show();
-
+                // 거부를 선택한 경우(permission denied)
+                else{
+                    // "다시 묻지 않음" 을 선택하지 않고 거부한 경우 다시 요청
+                    if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)){
+                        ActivityCompat.requestPermissions(
+                                SearchMapActivity.this,
+                                REQUIRED_PERMISSIONS,
+                                PERMISSIONS_REQUEST_CODE);
+                    }
+                    // "다시 묻지 않음" 을 선택하고 거부한 경우 설정창으로 이동
+                    else{
+                        showDialogForPermission();
+                    }
                 }
-                // "다시 묻지 않음"을 사용자가 체크하고 거부를 선택한 경우에는 설정(앱 정보)에서 퍼미션을 허용해야 앱을 사용할 수 있다.
-                else {
-                    Snackbar.make(mLayout, "퍼미션이 거부되었습니다. 설정(앱 정보)에서 퍼미션을 허용해야 합니다. ",
-                            Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    }).show();
-                }
-            }
-
         }
     }
 
+    /**
+     * 런타임 퍼미션 처리
+     */
     void checkRunTimePermission(){
-        // 런타임 퍼미션 처리
-        // 1. 위치 퍼미션을 가지고 있는지 체크한다.
+        // 위치 퍼미션을 가지고 있는지 확인
         int hasFineLocationPermission = ContextCompat.checkSelfPermission(SearchMapActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
+        // 퍼미션을 가지고 있는 경우
         if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED ) {
-            // 2. 이미 퍼미션을 가지고 있다면
-            // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식한다.)
-            // 3.  위치 값을 가져올 수 있음
-
+            // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식)
+            // 위치 값을 가져올 수 있음 -> 현재 위치 세팅
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
         }
-        else {  //2. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요하다. 2가지 경우(3-1, 4-1)가 있다.
-            // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우에는
-            if (ActivityCompat.shouldShowRequestPermissionRationale(SearchMapActivity.this, REQUIRED_PERMISSIONS[0])) {
-                // 3-2. 요청을 진행하기 전에 사용자가에게 퍼미션이 필요한 이유를 설명해줄 필요가 있다.
-                Toast.makeText(SearchMapActivity.this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show();
-                // 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionsResult에서 수신된다.
-                ActivityCompat.requestPermissions(SearchMapActivity.this, REQUIRED_PERMISSIONS,
+        // 퍼미션이 없는 경우 요청
+        else {
+                Toast.makeText(SearchMapActivity.this,
+                        "이 앱을 실행하려면 위치 접근 권한이 필요합니다.",
+                        Toast.LENGTH_LONG).show();
+
+                // onRequestPermissionsResult 함수 콜백
+                ActivityCompat.requestPermissions(
+                        SearchMapActivity.this,
+                        REQUIRED_PERMISSIONS,
                         PERMISSIONS_REQUEST_CODE);
-            }
-            else {
-                // 4-1. 사용자가 퍼미션 거부를 한 적이 없는 경우에는 퍼미션 요청을 바로 한다.
-                // 요청 결과는 onRequestPermissionsResult에서 수신된다.
-                ActivityCompat.requestPermissions(SearchMapActivity.this, REQUIRED_PERMISSIONS,
-                        PERMISSIONS_REQUEST_CODE);
-            }
         }
     }
 
-    // 여기부터는 GPS 활성화를 위한 메소드들
-    private void showDialogForLocationServiceSetting() {
-
+    /**
+     * 다시 묻지 않음을 선택하고 거부한 경우 설정으로 들어갈 수 있는 다이얼로그 생성
+     */
+    private void showDialogForPermission() {
+        // 다이얼로그 빌더 생성
         AlertDialog.Builder builder = new AlertDialog.Builder(SearchMapActivity.this);
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
                 + "위치 설정을 수정하시겠습니까?");
         builder.setCancelable(true);
+
+        // 다이얼로그에 설정 버튼 추가 및 리스너 바인딩
         builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                Intent callGPSSettingIntent
-                        = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivityForResult(callGPSSettingIntent, GPS_ENABLE_REQUEST_CODE);
+                // 설정으로 들어가 바로 수정할 수 있도록 인텐트 실행
+                Intent settingIntent = new Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", getPackageName(), null));
+
+                startActivity(settingIntent);
             }
         });
+
+        // 다이얼로그에 취소 버튼 추가 및 리스너 바인딩
         builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 dialog.cancel();
             }
         });
+
+        // 다이얼로그 보여주기
         builder.create().show();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case GPS_ENABLE_REQUEST_CODE:
-                //사용자가 GPS 활성 시켰는지 검사
-                if (checkLocationServicesStatus()) {
-                    if (checkLocationServicesStatus()) {
-                        Log.d(LOG_TAG, "onActivityResult : GPS 활성화 되있음");
-                        checkRunTimePermission();
-                        return;
-                    }
-                }
-                break;
-        }
-    }
-
+    /**
+     * GPS와 네트워크가 활성화되어 있는지 반환
+     * @return
+     */
     public boolean checkLocationServicesStatus(){
         LocationManager locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 
