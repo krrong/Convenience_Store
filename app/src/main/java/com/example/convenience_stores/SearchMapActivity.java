@@ -48,6 +48,8 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     private String BASE_URL = "https://dapi.kakao.com/";                    // 카카오 URL
     private String API_KEY = "KakaoAK a2d69db3c795c70fb4bcb73b7794abfb";    // 카카오 API 인증키
     private Button searchBtn;           // 편의점 검색 버튼
+    private Button changeModeBtn;       // 현위치 트래킹 모드 및 나침반 모드 변경 버튼
+    private int changeModeFlag = 2;     // 현위치 트래킹 모드 및 나침반 모드 변경 플래그
     private int radius = 500;           // 검색 반경 거리
 
     private double currentLatitude = 0;
@@ -86,9 +88,11 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
 
         // 버튼 바인딩
         searchBtn = findViewById(R.id.searchBtn);
+        changeModeBtn = findViewById(R.id.changeModeBtn);
 
         // 현재 위치 검색 될 때까지 버튼을 사용하지 못하게 함
-        searchBtn.setEnabled(false);
+        searchBtn.setClickable(false);
+        searchBtn.setText("현재 위치를 받아오고 있습니다.\n잠시만 기다려주세요");
     }
 
     // 버튼 리스너 작성
@@ -120,7 +124,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                 // 현재 위치 기준 맵 포인트 생성
                 MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(currentLatitude, currentLongitude);
 
-                // 중심점으로부터 반지름이 radius인 추가
+                // 중심점으로부터 반지름이 radius 인 원 추가
                 MapCircle mapCircle = new MapCircle(
                         mapPoint,           // 원의 중심좌표
                         radius,             // m단위 원의 반지름
@@ -187,7 +191,36 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                     }
                 });
                 
-                Toast.makeText(getApplicationContext(), "검색이 완료되었습니다.", Toast.LENGTH_SHORT).show();
+                // 사용자에게 알림
+                Toast.makeText(
+                        getApplicationContext(),
+                        "반경 " + radius + "m 내 편의점 검색 완료",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        changeModeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switch (changeModeFlag){
+                    // 현위치 트랙킹 모드 및 나침반 모드 Off
+                    case 0:
+                        changeModeFlag = 1;
+                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+                        break;
+
+                    // 현위치 트랙킹 모드 On, 단말의 위치에 따라 지도 중심이 이동한다. 나침반 모드는 꺼진 상태
+                    case 1:
+                        changeModeFlag = 2;
+                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+                        break;
+
+                    // 현위치 트랙킹 모드 On + 나침반 모드 On, 단말의 위치에 따라 지도 중심이 이동하며 단말의 방향에 따라 지도가 회전한다.(나침반 모드 On)
+                    case 2:
+                        changeModeFlag = 0;
+                        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading);
+                        break;
+                }
             }
         });
     }
@@ -201,7 +234,7 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         Log.e(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
 
         searchBtn.setText("주변 " + place + "검색하기");
-        searchBtn.setEnabled(true);
+        searchBtn.setClickable(true);
     }
 
     // ActivityCompat.requestPermissions 를 사용한 퍼미션 요청의 결과를 리턴받는 메소드
