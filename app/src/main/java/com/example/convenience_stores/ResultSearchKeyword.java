@@ -13,4 +13,5 @@ class Place{
     String road_address_name;   // 전체 도로명 주소
     String x;                   // X 좌표값 or longitude
     String y;                   // Y 좌표값 or latitude
+    String distance;            // 중심 좌표로부터의 거리
 }
