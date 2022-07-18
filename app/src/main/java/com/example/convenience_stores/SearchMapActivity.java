@@ -1,10 +1,6 @@
 package com.example.convenience_stores;
 
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +11,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -23,14 +18,17 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
-
+import net.daum.mf.map.api.CalloutBalloonAdapter;
 import net.daum.mf.map.api.MapCircle;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
+
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,8 +47,9 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
     private String API_KEY = "KakaoAK a2d69db3c795c70fb4bcb73b7794abfb";    // 카카오 API 인증키
     private Button searchBtn;           // 편의점 검색 버튼
     private Button changeModeBtn;       // 현위치 트래킹 모드 및 나침반 모드 변경 버튼
-    private int changeModeFlag = 2;     // 현위치 트래킹 모드 및 나침반 모드 변경 플래그
+    private int changeModeFlag = 2;     // 현위치 트래킹 모드 및 나침반 모드 플래그
     private int radius = 500;           // 검색 반경 거리
+    private HashMap<String,String> markerData = new HashMap<String,String>(); // (장소명, 전체 도로명 주소) 해시맵 생성
 
     private double currentLatitude = 0;
     private double currentLongitude = 0;
@@ -66,7 +65,6 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_search_map);
-
         initView();
         setBtnListener();
 
@@ -93,6 +91,8 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         // 현재 위치 검색 될 때까지 버튼을 사용하지 못하게 함
         searchBtn.setClickable(false);
         searchBtn.setText("현재 위치를 받아오고 있습니다.\n잠시만 기다려주세요");
+
+        mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter());
     }
 
     // 버튼 리스너 작성
@@ -166,11 +166,19 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                         // 기존에 찍혀있는 마커 삭제
                         mapView.removePOIItems(mapView.getPOIItems());
 
+                        // 기존에 해시맵에 저장되어 있는 내용 삭제
+                        markerData.clear();
+
                         // 받아온 위치에 마커 추가
                         for(Place document : response.body().documents){
                             // 받아온 위치 확인
                             Log.e("TEST", document.place_name);
+                            Log.e("TEST", document.road_address_name);
+                            Log.e("TEST", document.distance + "m");
 
+                            // 해시맵에 (장소명, 전체 도로명 주소) 저장
+                            markerData.put(document.place_name, document.road_address_name);
+                                    
                             // 마커 추가
                             MapPOIItem marker = new MapPOIItem();
                             MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(Double.parseDouble(document.y), Double.parseDouble(document.x));
@@ -179,7 +187,6 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
                             marker.setMapPoint(mapPoint);
                             marker.setMarkerType(MapPOIItem.MarkerType.BluePin);        // 기본 마커 모양
                             marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 클릭 시 바뀌는 모양
-
                             mapView.addPOIItem(marker); // 마커 추가
                         }
                         Log.e("TEST", "마커 추가 성공");
@@ -334,17 +341,50 @@ public class SearchMapActivity extends AppCompatActivity implements MapView.Curr
         builder.create().show();
     }
 
+    class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter{
+        private final View mCalloutBalloon;
 
-    /**
-     * GPS와 네트워크가 활성화되어 있는지 반환
-     * @return
-     */
-    public boolean checkLocationServicesStatus(){
-        LocationManager locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+        public CustomCalloutBalloonAdapter(){
+            mCalloutBalloon = getLayoutInflater().inflate(R.layout.custom_callout_balloon, null);
+        }
 
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        // 마커 클릭 시 표시할 뷰
+        @Override
+        public View getCalloutBalloon(MapPOIItem mapPOIItem) {
+            ImageView badge = ((ImageView) mCalloutBalloon.findViewById(R.id.badge));
+            TextView title = ((TextView) mCalloutBalloon.findViewById(R.id.title));
+            TextView desc = ((TextView) mCalloutBalloon.findViewById(R.id.desc));
+
+            String place_name = mapPOIItem.getItemName();
+            String road_address_name = markerData.get(place_name);
+            int imageResource = 0;
+
+            switch (place){
+                case "CU":
+                    imageResource = R.drawable.cu_logo;
+                    break;
+                case "7ELEVEN":
+                    imageResource = R.drawable.seven_logo;
+                    break;
+                case "GS25":
+                    imageResource = R.drawable.gs25_logo;
+                    break;
+            }
+
+            badge.setImageResource(imageResource);
+            title.setText(place_name);
+            desc.setText(road_address_name);
+
+            return mCalloutBalloon;
+        }
+
+        // 말풍선 클릭 시 표시할 뷰
+        @Override
+        public View getPressedCalloutBalloon(MapPOIItem mapPOIItem) {
+            return null;
+        }
     }
+
 //
 //    // 키워드 검색 함수
 //    private void searchKeyword(String keyword){
